@@ -11,6 +11,7 @@ import urllib.request
 
 import schedule
 import slack.chat
+import slack.channels
 from bs4 import BeautifulSoup
 
 
