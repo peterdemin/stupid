@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 
 CHANNEL_NAME = 'loud-launches'
 CHANNEL_ID = 'C0G8JR6TE'  # channel_id(CHANNEL_NAME)
+slack.api_token = os.environ.pop('STUPID_TOKEN')
 
 
 def weekday(func):
@@ -91,16 +92,24 @@ def print_some():
     print('ok')
 
 
+@weekday
+def post_quote():
+    registry = Quotes()
+    quote = registry.get_random_quote()
+    post(quote.text)  # .text.encode('utf-8'))
+    registry.mark_as_shown(quote)
+
+
 def print_jobs():
     for job in schedule.default_scheduler.jobs:
         print(job.next_run)
 
 
 def main():
-    slack.api_token = os.environ['STUPID_TOKEN']
     schedule.every().day.at("11:55").do(eat_some)
     schedule.every().day.at("15:55").do(eat_some)
     schedule.every().day.at("17:15").do(post, 'Go home')
+    schedule.every().day.at("9:30").do(post_quote)
     print_jobs()
     while True:
         schedule.run_pending()
@@ -204,7 +213,7 @@ class Quotes:
 
     def mark_as_shown(self, quote):
         cursor = self.db.cursor()
-        cursor.execute("UPDATE quotes SET shown=1 WHERE id=?", quote.id)
+        cursor.execute("UPDATE quotes SET shown=1 WHERE id=?", (str(quote.id),))
 
 
 def update_bash(start_page=1, end_page=10):
@@ -219,6 +228,7 @@ def check():
     schedule.every().day.at("11:55").do(print_some)
     schedule.every().day.at("15:55").do(print_some)
     schedule.every().day.at("17:15").do(print_some)
+    schedule.every().day.at("9:30").do(print_some)
     print_jobs()
     schedule.default_scheduler.run_all()
     quote = Quotes().get_random_quote()
