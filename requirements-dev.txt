@@ -1,1 +1,6 @@
--r requirements.txt
+pytest
+pytest-runner
+mock
+nose
+ipdb
+ipdbplugin
