@@ -1,19 +1,21 @@
 import datetime
+from collections import namedtuple
 import errno
 import functools
 import os
+import random
 import sqlite3
 import sys
 import time
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
 
 import schedule
 import slack.chat
 from bs4 import BeautifulSoup
 
 
-CHANNEL = '#loud-launches'
-oldest_message = None
+CHANNEL_NAME = 'loud-launches'
+CHANNEL_ID = 'C0G8JR6TE'  # channel_id(CHANNEL_NAME)
 
 
 def weekday(func):
@@ -25,16 +27,63 @@ def weekday(func):
 
 
 def post(message):
-    return slack.chat.post_message(CHANNEL, message, username='Stupid')
+    return slack.chat.post_message(CHANNEL_ID, message, username='Stupid')
 
 
-def read_new_messages():
-    slack.channels.history(CHANNEL, oldest_message)
+def channel_info(name):
+    for channel_info in slack.channels.list()['channels']:
+        if channel_info['name'] == 'loud-launches':
+            return channel_info
+
+
+def channel_id(name):
+    return channel_info(name)['id']
+
+
+def user_name(user_id):
+    return user_info(user_id)['name']
+
+
+def user_info(user_id):
+    return slack.users.info(user_id)['user']
+
+
+def read_new_messages(oldest_ts=None):
+    return slack.channels.history(CHANNEL_ID, oldest=oldest_ts)['messages']
 
 
 @weekday
 def eat_some():
+    users = {user_id: user_name(user_id)
+             for user_id in channel_info(CHANNEL_NAME)['members']}
+    schedule.every().minute.do(
+        ask_for_reply,
+        users=users,
+        announce_ts=time.time(),
+    )
     return post('Eat some!')
+
+
+def ask_for_reply(users, announce_ts):
+    attempt_number = round((time.time() - announce_ts) / 60)
+    if attempt_number <= 5:
+        replied_user_ids = {x['user'] for x in read_new_messages(announce_ts)}
+        if replied_user_ids.intersection(users):
+            # At least one user replied
+            to_ask = set(users).difference(replied_user_ids)
+            if to_ask:
+                for user_id in to_ask:
+                    post('@{0}, are you going to eat some?'.format(users[user_id]))
+                # Looks like one reminder is enough...
+                return schedule.CancelJob
+            else:
+                # Everyone replied
+                return schedule.CancelJob
+        else:
+            # Do not be first to reply to yourself
+            return None
+    else:
+        return schedule.CancelJob
 
 
 @weekday
@@ -58,24 +107,16 @@ def main():
         time.sleep(1)
 
 
-def check():
-    schedule.every().day.at("11:55").do(print_some)
-    schedule.every().day.at("15:55").do(print_some)
-    schedule.every().day.at("17:15").do(print_some)
-    print_jobs()
-    schedule.default_scheduler.run_all()
-
-
-
-class Parser:
+class Quotes:
     db_file = "quotes.sqlite3"
     user_agent = (
         "Mozilla/5.0 "
         "(X11; Ubuntu; Linux x86_64; rv:30.0) "
         "Gecko/20100101 Firefox/30.0"
     )
+    Quote = namedtuple('Quote', ('id', 'text', 'date', 'shown'))
 
-    def __init__(self, start_page, end_page):
+    def __init__(self, start_page=None, end_page=None):
         self.start_page = start_page
         self.end_page = end_page
         self.db = sqlite3.connect(self.db_file)
@@ -85,7 +126,7 @@ class Parser:
         cursor = self.db.cursor()
         cursor.execute(
             "CREATE TABLE IF NOT EXISTS quotes "
-            "(id INTEGER, text TEXT, datetime INTEGER)"
+            "(id INTEGER, text TEXT, datetime INTEGER, shown BOOLEAN)"
         )
         self.db.commit()
 
@@ -106,7 +147,7 @@ class Parser:
 
     def parse_quotes(self, page_number):
         html = self.fetch_page(page_number)
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "html.parser")
         quote_divs = soup.find_all("div", class_="quote")
         for quote_div in quote_divs:
             quote = {}
@@ -148,19 +189,40 @@ class Parser:
         dt = datetime.datetime.strptime(quote["datetime"], "%Y-%m-%d %H:%M")
         timestamp = (dt - datetime.datetime(1970, 1, 1)).total_seconds()
         cursor.execute(
-            "INSERT INTO quotes (id, text, datetime) VALUES (?,?,?)",
-            (quote["id"], quote["text"], timestamp)
+            "INSERT INTO quotes (id, text, datetime, shown) VALUES (?,?,?,?)",
+            (quote["id"], quote["text"], timestamp, False)
         )
         self.db.commit()
 
+    def get_random_quote(self):
+        cursor = self.db.cursor()
+        ids = cursor.execute("SELECT id FROM quotes WHERE shown=0").fetchall()
+        the_id = random.choice(ids)
+        row = cursor.execute("SELECT * FROM quotes WHERE id=?", the_id).fetchone()
+        # import pdb; pdb.set_trace()  # XXX BREAKPOINT
+        return self.Quote(*row)
 
-def update_bash(start_page=0, end_page=10):
+    def mark_as_shown(self, quote):
+        cursor = self.db.cursor()
+        cursor.execute("UPDATE quotes SET shown=1 WHERE id=?", quote.id)
+
+
+def update_bash(start_page=1, end_page=10):
     if start_page > 0 and end_page >= start_page:
-        p = Parser(start_page, end_page)
-        p.parse_all_pages()
+        Quotes(start_page, end_page).parse_all_pages()
     else:
         sys.stderr.write("Please check the page numbers\n")
         sys.exit(errno.EINVAL)
+
+
+def check():
+    schedule.every().day.at("11:55").do(print_some)
+    schedule.every().day.at("15:55").do(print_some)
+    schedule.every().day.at("17:15").do(print_some)
+    print_jobs()
+    schedule.default_scheduler.run_all()
+    quote = Quotes().get_random_quote()
+    sys.stdout.buffer.write(quote.text.encode('utf-8'))
 
 
 if __name__ == '__main__':
