@@ -29,7 +29,7 @@ def main():
     schedule.every().day.at("11:55").do(eat_some)
     schedule.every().day.at("15:55").do(eat_some)
     schedule.every().day.at("17:15").do(post, 'Go home')
-    schedule.every().day.at("9:30").do(post_quote)
+    schedule.every().day.at("9:25").do(post_quote)
     run_forever()
 
 
