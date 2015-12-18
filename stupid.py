@@ -11,6 +11,7 @@ import time
 import urllib.request
 from collections import namedtuple
 
+import requests
 import schedule
 import slack.channels
 import slack.chat
@@ -19,7 +20,6 @@ from bs4 import BeautifulSoup
 
 CHANNEL_NAME = 'loud-launches'
 CHANNEL_ID = 'C0G8JR6TE'  # channel_id(CHANNEL_NAME)
-slack.api_token = os.environ.pop('STUPID_TOKEN')
 
 
 logger = logging.getLogger('stupid')
@@ -81,7 +81,7 @@ def read_new_messages(oldest_ts=None):
 def eat_some():
     users = {user_id: user_name(user_id)
              for user_id in channel_info(CHANNEL_NAME)['members']}
-    response = post('Eat some!')
+    response = post("Eat some! But be aware: it's {0}".format(weather.report()))
     logger.debug('Posted %r', response)
     announce_ts = float(response['message']['ts'])
     logger.debug('Scheduling ask_for_reply for %r after %r',
@@ -224,12 +224,38 @@ class Quotes:
         ids = cursor.execute("SELECT id FROM quotes WHERE shown=0").fetchall()
         the_id = random.choice(ids)
         row = cursor.execute("SELECT * FROM quotes WHERE id=?", the_id).fetchone()
-        # import pdb; pdb.set_trace()  # XXX BREAKPOINT
         return self.Quote(*row)
 
     def mark_as_shown(self, quote):
         cursor = self.db.cursor()
         cursor.execute("UPDATE quotes SET shown=1 WHERE id=?", (str(quote.id),))
+
+
+class WeatherForecast(object):
+    def __init__(self, token=None):
+        self.token = token
+
+    def report(self, latitude=38.9977, longitude=-77.0988):
+        data = self.currently(latitude, longitude)
+        return "{0:.0f} \u00B0F at {1:.1f} mph wind".format(
+            data['apparentTemperature'],
+            data['windSpeed'],
+        )
+
+    def currently(self, latitude, longitude):
+        return self.forecast(latitude, longitude).json()['currently']
+
+    def forecast(self, latitude, longitude):
+        url = 'https://{url}/{token}/{latitude:.4f},{longitude:.4f}'.format(
+            url='api.forecast.io/forecast',
+            token=self.token,
+            latitude=latitude,
+            longitude=longitude,
+        )
+        logger.debug("Fetching %r", url)
+        response = requests.get(url)
+        logger.debug("Result %r", response.status_code)
+        return response
 
 
 def update_bash(start_page=1, end_page=10):
@@ -262,6 +288,10 @@ logging.config.dictConfig({
         },
     }
 })
+
+
+slack.api_token = os.environ.pop('STUPID_TOKEN')
+weather = WeatherForecast(os.environ.pop('STUPID_WEATHER_TOKEN'))
 
 
 if __name__ == '__main__':
