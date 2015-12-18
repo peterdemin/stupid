@@ -94,9 +94,10 @@ def eat_some():
 
 def ask_for_reply(users, announce_ts):
     attempt_number = round((time.time() - announce_ts) / 60)
-    if attempt_number <= 5:
+    if attempt_number <= 15:
         logger.debug("Asking for reply #%d", attempt_number)
-        replied_user_ids = {x['user'] for x in read_new_messages(announce_ts)}
+        # Bot messages do not have 'user' field
+        replied_user_ids = {x.get('user', None) for x in read_new_messages(announce_ts)}
         logger.debug("Users replied after announcement: %r", replied_user_ids)
         if replied_user_ids.intersection(users):
             # At least one user replied
@@ -266,5 +267,11 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == 'bash':
             update_bash()
+            sys.exit(0)
+        elif sys.argv[1] == 'read':
+            ts = None
+            if len(sys.argv) > 2:
+                ts = float(sys.argv[2])
+            sys.stdout.buffer.write(str(read_new_messages(ts)).encode('utf-8'))
             sys.exit(0)
     main()
