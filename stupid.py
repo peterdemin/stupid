@@ -81,7 +81,9 @@ def read_new_messages(oldest_ts=None):
 def eat_some():
     users = {user_id: user_name(user_id)
              for user_id in channel_info(CHANNEL_NAME)['members']}
-    announce_ts = time.time()
+    response = post('Eat some!')
+    logger.debug('Posted %r', response)
+    announce_ts = float(response['message']['ts'])
     logger.debug('Scheduling ask_for_reply for %r after %r',
                  users, announce_ts)
     schedule.every().minute.do(
@@ -89,7 +91,6 @@ def eat_some():
         users=users,
         announce_ts=announce_ts,
     )
-    return post('Eat some!')
 
 
 def ask_for_reply(users, announce_ts):
