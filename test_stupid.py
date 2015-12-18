@@ -51,6 +51,28 @@ class AskForReplyTestCase(unittest.TestCase):
         assert '@b,' in messages[0]
 
 
+def test_fate():
+    fate = stupid.FateGame.start()
+    assert type(fate.invitation) == str
+    assert type(fate.verifier) == str
+
+
+@patch('stupid.read_new_messages', return_value=[{'text': '@' + stupid.MY_ID + ' a', 'ts': 0}])
+def test_reader(read_new_messages):
+    handler = DummyHandler()
+    reader = stupid.Reader(handler)
+    reader.read()
+    assert handler.called is True
+
+
+class DummyHandler(object):
+    triggers = 'a'
+
+    def on_message(self, text):
+        self.called = True
+        return None
+
+
 @stupid.weekday
 def print_some():
     print('ok')

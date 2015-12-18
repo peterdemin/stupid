@@ -1,3 +1,4 @@
+import hashlib
 import datetime
 import errno
 import functools
@@ -20,6 +21,7 @@ from bs4 import BeautifulSoup
 
 CHANNEL_NAME = 'loud-launches'
 CHANNEL_ID = 'C0G8JR6TE'  # channel_id(CHANNEL_NAME)
+MY_ID = 'U0GN5LAQ3'
 
 
 logger = logging.getLogger('stupid')
@@ -30,6 +32,8 @@ def main():
     schedule.every().day.at("15:55").do(eat_some)
     schedule.every().day.at("17:15").do(post, 'Go home')
     schedule.every().day.at("9:25").do(post_quote)
+    reader = Reader(FateGame)
+    schedule.every(10).seconds.do(reader.read)
     run_forever()
 
 
@@ -75,6 +79,32 @@ def user_info(user_id):
 
 def read_new_messages(oldest_ts=None):
     return slack.channels.history(CHANNEL_ID, oldest=oldest_ts)['messages']
+
+
+class Reader(object):
+    def __init__(self, handler):
+        self.handler = handler
+        self.oldest_ts = None
+
+    def read(self):
+        logger.debug('read')
+        messages = read_new_messages(self.oldest_ts)
+        if messages:
+            for message in messages:
+                text = message['text']
+                logger.debug('Parsing %s', text)
+                if self.has_trigger(text):
+                    logger.debug('Triggering %r', self.handler)
+                    response = self.handler.on_message(text)
+                    if response is not None:
+                        post_response = post(response)
+                        if hasattr(self.handler, 'on_posted'):
+                            self.handler.on_posted(post_response)
+            self.oldest_ts = messages[0]['ts']
+
+    def has_trigger(self, message):
+        msg = message.lower()
+        return '<@{0}>'.format(MY_ID) in message and any(trigger in msg for trigger in self.handler.triggers)
 
 
 @weekday
@@ -231,6 +261,14 @@ class Quotes:
         cursor.execute("UPDATE quotes SET shown=1 WHERE id=?", (str(quote.id),))
 
 
+def update_bash(start_page=1, end_page=10):
+    if start_page > 0 and end_page >= start_page:
+        Quotes(start_page, end_page).parse_all_pages()
+    else:
+        sys.stderr.write("Please check the page numbers\n")
+        sys.exit(errno.EINVAL)
+
+
 class WeatherForecast(object):
     def __init__(self, token=None):
         self.token = token
@@ -258,12 +296,45 @@ class WeatherForecast(object):
         return response
 
 
-def update_bash(start_page=1, end_page=10):
-    if start_page > 0 and end_page >= start_page:
-        Quotes(start_page, end_page).parse_all_pages()
-    else:
-        sys.stderr.write("Please check the page numbers\n")
-        sys.exit(errno.EINVAL)
+class FateGame(object):
+    current_game = None
+    triggers = 'fate', 'done'
+    good_bye = ("You can check target number by executing following code:\n"
+                "python -c 'import hashlib; print hashlib.md5(\"{0}\".encode('utf-8')).hexdigest()[:6]'")
+
+    def __init__(self):
+        self.setup_game()
+
+    @staticmethod
+    def start():
+        FateGame.current_game = FateGame()
+        return FateGame.current_game
+
+    @staticmethod
+    def on_message(message):
+        if 'done' in message:
+            if FateGame.current_game is not None:
+                result = FateGame.current_game.verifier
+                FateGame.current_game = None
+                return FateGame.good_bye.format(result)
+        elif 'fate' in message:
+            return FateGame.start().invitation
+
+    def setup_game(self):
+        self.game_id = random.randint(1, 9999)
+        self.winner_nbr = random.randint(1, 100)
+        self.verifier = 'Fate game #{0} target number: {1}'.format(self.game_id, self.winner_nbr)
+
+    @property
+    def invitation(self):
+        verifier_hash = self.easy_hash(self.verifier)
+        return ("Everyone picks a number between 1 and 100.\n"
+                "Then target number is posted.\n"
+                "The one, who picked number closest to target wins\n"
+                "Verification hash for this game is {0}".format(verifier_hash))
+
+    def easy_hash(self, text):
+        return hashlib.md5(text.encode('utf-8')).hexdigest()[:6]
 
 
 logging.config.dictConfig({
@@ -278,6 +349,7 @@ logging.config.dictConfig({
         'default': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'formatter': 'standard',
         },
     },
     'loggers': {
