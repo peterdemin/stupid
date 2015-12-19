@@ -9,7 +9,6 @@ import random
 import sqlite3
 import sys
 import time
-import urllib.request
 from collections import namedtuple
 
 import requests
@@ -192,12 +191,10 @@ class Quotes:
         return "http://bash.im/index/%s" % page_number
 
     def fetch_page(self, page_number):
-        req = urllib.request.Request(
-            url=self.get_url(page_number),
+        return requests.get(
+            self.get_url(page_number),
             headers={"User-Agent": self.user_agent}
-        )
-        f = urllib.request.urlopen(req)
-        return f.read()
+        ).text
 
     def parse_all_pages(self):
         for page_number in range(self.start_page, self.end_page + 1):
