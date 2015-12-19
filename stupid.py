@@ -87,7 +87,6 @@ class Reader(object):
         self.oldest_ts = None
 
     def read(self):
-        logger.debug('read')
         messages = read_new_messages(self.oldest_ts)
         if messages:
             for message in messages:
