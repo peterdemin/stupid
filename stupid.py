@@ -49,7 +49,7 @@ def run_forever():
 def weekday(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        if datetime.datetime.now().weekday() in range(0, 6):
+        if datetime.datetime.now().weekday() in range(0, 5):
             return func(*args, **kwargs)
     return wrapper
 
