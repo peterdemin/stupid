@@ -296,7 +296,7 @@ class WeatherForecast(object):
 class FateGame(object):
     current_game = None
     triggers = 'fate', 'done'
-    good_bye = ("You can check target number by executing following code:\n"
+    good_bye = ("{0}\nYou can check target number by executing following code:\n"
                 "python -c 'import hashlib; print hashlib.md5(\"{0}\".encode('utf-8')).hexdigest()[:6]'")
 
     def __init__(self):
