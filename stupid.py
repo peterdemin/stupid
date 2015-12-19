@@ -21,6 +21,7 @@ from bs4 import BeautifulSoup
 CHANNEL_NAME = 'loud-launches'
 CHANNEL_ID = 'C0G8JR6TE'  # channel_id(CHANNEL_NAME)
 MY_ID = 'U0GN5LAQ3'
+MY_USERNAME = 'Stupid'
 
 
 logger = logging.getLogger('stupid')
@@ -90,6 +91,10 @@ class Reader(object):
         messages = read_new_messages(self.oldest_ts)
         if messages:
             for message in messages:
+                if self.is_from_me(message):
+                    # Bot already replied, skip remaining messages
+                    logger.debug('Found own reply. Skipping older messages')
+                    break
                 text = message['text']
                 logger.debug('Parsing %s', text)
                 if self.has_trigger(text):
@@ -104,6 +109,9 @@ class Reader(object):
     def has_trigger(self, message):
         msg = message.lower()
         return '<@{0}>'.format(MY_ID) in message and any(trigger in msg for trigger in self.handler.triggers)
+
+    def is_from_me(self, message):
+        return message.get('username', None) == MY_USERNAME
 
 
 @weekday

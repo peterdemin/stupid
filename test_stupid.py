@@ -57,7 +57,7 @@ def test_fate():
     assert type(fate.verifier) == str
 
 
-@patch('stupid.read_new_messages', return_value=[{'text': '@' + stupid.MY_ID + ' a', 'ts': 0}])
+@patch('stupid.read_new_messages', return_value=[{'text': '<@' + stupid.MY_ID + '> a', 'ts': 0}])
 def test_reader(read_new_messages):
     handler = DummyHandler()
     reader = stupid.Reader(handler)
