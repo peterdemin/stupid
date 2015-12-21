@@ -30,7 +30,7 @@ logger = logging.getLogger('stupid')
 def main():
     schedule.every().day.at("11:55").do(eat_some)
     schedule.every().day.at("15:55").do(eat_some)
-    schedule.every().day.at("17:15").do(post, 'Go home')
+    schedule.every().day.at("17:15").do(go_home)
     schedule.every().day.at("9:25").do(post_quote)
     reader = Reader(FateGame)
     schedule.every(10).seconds.do(reader.read)
@@ -114,6 +114,11 @@ class Reader(object):
 
 
 @weekday
+def go_home():
+    return post('Russian, go home')
+
+
+@weekday
 def eat_some():
     users = {user_id: user_name(user_id)
              for user_id in channel_info(CHANNEL_NAME)['members']}
@@ -160,7 +165,7 @@ def ask_for_reply(users, announce_ts):
 def post_quote():
     registry = Quotes()
     quote = registry.get_random_quote()
-    post(quote.text)  # .text.encode('utf-8'))
+    post(quote.text)
     registry.mark_as_shown(quote)
 
 
