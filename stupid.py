@@ -121,7 +121,8 @@ def go_home():
 @weekday
 def eat_some():
     users = {user_id: user_name(user_id)
-             for user_id in channel_info(CHANNEL_NAME)['members']}
+             for user_id in channel_info(CHANNEL_NAME)['members']
+             if user_id != MY_ID}
     response = post("Eat some! But be aware: it's {0}".format(weather.report()))
     logger.debug('Posted %r', response)
     announce_ts = float(response['message']['ts'])
