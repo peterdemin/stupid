@@ -1,0 +1,6 @@
+[Core]
+Name = Stupid
+Module = stupid
+
+[Documentation]
+Description = stupid plugin
