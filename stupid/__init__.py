@@ -1,10 +1,11 @@
-import hashlib
 import datetime
 import functools
+import hashlib
 import itertools
 import logging.config
 import os
 import random
+import re
 import time
 
 import requests
@@ -89,14 +90,15 @@ class Reader(object):
                     if response is not None:
                         post_response = post(response)
                         if hasattr(self.handler, 'on_posted'):
-                            self.handler.on_posted(post_response)
+                            self.handler.on_posted(post_response['message'])
             self.oldest_ts = messages[0]['ts']
 
     def has_trigger(self, message):
         msg = message.lower()
         return '<@{0}>'.format(MY_ID) in message and any(trigger in msg for trigger in self.handler.triggers)
 
-    def is_from_me(self, message):
+    @staticmethod
+    def is_from_me(message):
         return message.get('username', None) == MY_USERNAME
 
 
@@ -196,8 +198,10 @@ class FateGame(object):
     triggers = 'fate', 'done'
     good_bye = ("{0}\nYou can check target number by executing following code:\n"
                 "python -c 'import hashlib; print(hashlib.md5(\"{0}\".encode(\"utf-8\")).hexdigest()[:6])'")
+    re_numbers = re.compile(r'\b\d+\b')
 
     def __init__(self):
+        self.invitation_time = None
         self.setup_game()
 
     @staticmethod
@@ -209,11 +213,38 @@ class FateGame(object):
     def on_message(message):
         if 'done' in message:
             if FateGame.current_game is not None:
-                result = FateGame.current_game.verifier
+                result = FateGame.current_game.compose_result()
                 FateGame.current_game = None
-                return FateGame.good_bye.format(result)
+                return result
         elif 'fate' in message:
             return FateGame.start().invitation
+
+    def compose_result(self):
+        result = self.verifier
+        winner = self.winner_username()
+        if winner:
+            result = '\n'.join([winner, result])
+        return self.good_bye.format(result)
+
+    def winner_username(self):
+        if self.invitation_time is not None:
+            bets = {}
+            for message in read_new_messages(self.invitation_time):
+                if Reader.is_from_me(message):
+                    # Bot already replied, skip remaining messages
+                    logger.debug('Found own reply. Skipping older messages')
+                    break
+                numbers = self.re_numbers.findall(message['text'])
+                if numbers and message['user'] not in bets:
+                    bets[message['user']] = abs(int(numbers[-1]) - self.winner_nbr)
+            if bets:
+                user_id, user_bet = sorted(bets.items(), key=lambda a: a[1])[0]
+                return 'The winner is {0} with his bet {1}'.format(user_name(user_id), user_bet)
+
+    @staticmethod
+    def on_posted(message):
+        if FateGame.current_game is not None:
+            FateGame.current_game.invitation_time = message['ts']
 
     def setup_game(self):
         self.game_id = random.randint(1, 9999)
