@@ -228,18 +228,39 @@ class FateGame(object):
 
     def winner_username(self):
         if self.invitation_time is not None:
-            bets = {}
-            for message in read_new_messages(self.invitation_time):
-                if Reader.is_from_me(message):
-                    # Bot already replied, skip remaining messages
-                    logger.debug('Found own reply. Skipping older messages')
-                    break
-                numbers = self.re_numbers.findall(message['text'])
-                if numbers and message['user'] not in bets:
-                    bets[message['user']] = abs(int(numbers[-1]) - self.winner_nbr)
+            bets = self.parse_bets(read_new_messages(self.invitation_time))
             if bets:
-                user_id, user_bet = sorted(bets.items(), key=lambda a: a[1])[0]
+                user_id, user_bet = self.winner_bet(bets)
                 return 'The winner is {0} with his bet {1}'.format(user_name(user_id), user_bet)
+
+    def winner_bet(self, bets):
+        return sorted(bets.items(), key=lambda a: abs(a[1] - self.winner_nbr))[0]
+
+    def parse_bets(self, messages):
+        bets = {}
+        for message in messages:
+            if Reader.is_from_me(message):
+                # Bot already replied, skip remaining messages
+                logger.debug('Found own reply. Skipping older messages')
+                break
+            current_bets = filter(self.is_valid_bet, self.parse_numbers(message['text']))
+            if current_bets and message['user'] not in bets:
+                bets[message['user']] = current_bets[-1]
+        return bets
+
+    @staticmethod
+    def parse_numbers(text):
+        numbers = []
+        for word in text.split():
+            try:
+                numbers.append(int(word))
+            except ValueError:
+                pass
+        return numbers
+
+    @staticmethod
+    def is_valid_bet(self, number):
+        return 0 < number < 100
 
     @staticmethod
     def on_posted(message):
