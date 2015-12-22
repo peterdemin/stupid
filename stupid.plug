@@ -4,3 +4,6 @@ Module = stupid
 
 [Documentation]
 Description = stupid plugin
+
+[Python]
+Version=2+

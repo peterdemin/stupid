@@ -2,3 +2,5 @@ requests
 pyslack
 schedule
 beautifulsoup4
+errbot
+slackclient
