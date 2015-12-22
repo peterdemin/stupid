@@ -1,8 +1,6 @@
-import hashlib
-import datetime
 import errno
 import functools
-import itertools
+import hashlib
 import logging.config
 import os
 import random
@@ -11,11 +9,61 @@ import sys
 import time
 from collections import namedtuple
 
+import datetime
 import requests
 import schedule
 import slack.channels
 import slack.chat
 from bs4 import BeautifulSoup
+from errbot import BotPlugin
+
+
+class Remainder(BotPlugin):
+    def my_callback(self):
+        if datetime.datetime.now().weekday() in range(0, 5):
+            schedule.run_pending()
+
+    def activate(self):
+        super(Remainder, self).activate()
+        for room in self.rooms():
+            if room.name == CHANNEL_NAME:
+                self.the_room = room
+        schedule.every().day.at("11:55").do(self.eat_some)
+        schedule.every().day.at("15:55").do(self.eat_some)
+        schedule.every().day.at("17:15").do(self.post, 'Go home')
+        schedule.every().day.at("9:25").do(self.post_quote)
+        self.start_poller(5, self.my_callback)
+        self.eat_some()
+
+    def post_quote(self):
+        registry = Quotes()
+        quote = registry.get_random_quote()
+        self.log.info(quote)
+        self.post(quote.text)
+        registry.mark_as_shown(quote)
+
+    def post(self, message):
+        return self.send(
+            user=self.the_room,
+            message_type='groupchat',
+            text=message,
+        )
+
+    def eat_some(self):
+        import ipdb; ipdb.set_trace()  # noqa
+        occupants = self.the_room.occupants
+        users = {user_id: user_name(user_id)
+                 for user_id in channel_info(CHANNEL_NAME)['members']}
+        response = post("Eat some! But be aware: it's {0}".format(weather.report()))
+        logger.debug('Posted %r', response)
+        announce_ts = float(response['message']['ts'])
+        logger.debug('Scheduling ask_for_reply for %r after %r',
+                     users, announce_ts)
+        schedule.every().minute.do(
+            ask_for_reply,
+            users=users,
+            announce_ts=announce_ts,
+        )
 
 
 CHANNEL_NAME = 'loud-launches'
@@ -25,25 +73,6 @@ MY_USERNAME = 'Stupid'
 
 
 logger = logging.getLogger('stupid')
-
-
-def main():
-    schedule.every().day.at("11:55").do(eat_some)
-    schedule.every().day.at("15:55").do(eat_some)
-    schedule.every().day.at("17:15").do(post, 'Go home')
-    schedule.every().day.at("9:25").do(post_quote)
-    reader = Reader(FateGame)
-    schedule.every(10).seconds.do(reader.read)
-    run_forever()
-
-
-def run_forever():
-    for i in itertools.count(0):
-        schedule.run_pending()
-        if i % 600 == 0:
-            logger.info('Iteration #%d', i)
-            logger.info(render_jobs())
-        time.sleep(1)
 
 
 def weekday(func):
@@ -113,22 +142,6 @@ class Reader(object):
         return message.get('username', None) == MY_USERNAME
 
 
-@weekday
-def eat_some():
-    users = {user_id: user_name(user_id)
-             for user_id in channel_info(CHANNEL_NAME)['members']}
-    response = post("Eat some! But be aware: it's {0}".format(weather.report()))
-    logger.debug('Posted %r', response)
-    announce_ts = float(response['message']['ts'])
-    logger.debug('Scheduling ask_for_reply for %r after %r',
-                 users, announce_ts)
-    schedule.every().minute.do(
-        ask_for_reply,
-        users=users,
-        announce_ts=announce_ts,
-    )
-
-
 def ask_for_reply(users, announce_ts):
     attempt_number = round((time.time() - announce_ts) / 60)
     if attempt_number <= 15:
@@ -154,14 +167,6 @@ def ask_for_reply(users, announce_ts):
     else:
         logger.debug("Asking for reply timeout - %d - cancelling", attempt_number)
         return schedule.CancelJob
-
-
-@weekday
-def post_quote():
-    registry = Quotes()
-    quote = registry.get_random_quote()
-    post(quote.text)  # .text.encode('utf-8'))
-    registry.mark_as_shown(quote)
 
 
 def render_jobs():
@@ -222,7 +227,7 @@ class Quotes:
             # text strings using \n as separator results in
             # the quote text with line breaks preserved.
             quote["text"] = "\n".join(
-                [x for x in text_div.contents if isinstance(x, str)]
+                [x for x in text_div.contents if isinstance(x, basestring)]
             )
             actions_div = quote_div.find("div", class_="actions")
             quote["datetime"] = actions_div.find(
@@ -366,7 +371,6 @@ logging.config.dictConfig({
 })
 
 
-slack.api_token = os.environ.pop('STUPID_TOKEN')
 weather = WeatherForecast(os.environ.pop('STUPID_WEATHER_TOKEN'))
 
 
@@ -381,4 +385,3 @@ if __name__ == '__main__':
                 ts = float(sys.argv[2])
             sys.stdout.buffer.write(str(read_new_messages(ts)).encode('utf-8'))
             sys.exit(0)
-    main()
