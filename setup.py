@@ -65,7 +65,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'stupid = stupid:main',
+            'stupid = stupid.main:main',
         ]
     },
     setup_requires=['nose>=1.0'],
