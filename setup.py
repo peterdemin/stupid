@@ -9,7 +9,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-version = "1.0.1"
+version = "1.0.2"
 
 if sys.argv[-1] == 'publish':
     try:
@@ -38,6 +38,7 @@ def get_requirements(filename):
                 if not x.strip().startswith('#')]
     return reqs
 
+
 setup(
     name='stupid',
     version=version,
@@ -47,7 +48,7 @@ setup(
     author_email='petr.demin@nih.gov',
     url='https://github.com/peterdemin/stupid',
     include_package_data=True,
-    py_modules=['stupid'],
+    packages=['stupid'],
     install_requires=get_requirements('requirements.txt'),
     license="BSD",
     zip_safe=False,
