@@ -12,7 +12,7 @@ import schedule
 import slack.channels
 import slack.chat
 
-from quotes import QuotesDatabase
+from stupid.quotes import QuotesDatabase
 
 
 CHANNEL_NAME = 'loud-launches'
