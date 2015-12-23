@@ -7,55 +7,91 @@ import logging
 logger = logging.getLogger('stupid.fate')
 
 
+class FateGameBot(object):
+    """
+    Helper class, that adapts FateGame to Slack chat
+    """
+    finish_ptrn = ("{0}\n"
+                   "You can check target number by executing following code:\n"
+                   "python -c 'import hashlib; print(hashlib.md5(\"{0}\".encode(\"utf-8\")).hexdigest()[:6])'")
+
+    def __init__(self):
+        self.triggers = 'fate', 'done'
+        self.game = None
+        self.invitation_time = None
+
+    def on_message(self, message):
+        if 'done' in message:
+            if self.game is not None:
+                return self.on_done()
+        elif 'fate' in message:
+            self.game = FateGame()
+            return self.game.invitation
+
+    def on_done(self):
+        winner_info = self.game.determine_winner(self.game_messages())
+        result = self.game.compose_result(winner_info)
+        self.game = None
+        return result
+
+    def compose_result(self, winner_info):
+        result = self.verifier
+        winner_info['username'] = self.username(winner_info['userid'])
+        announcement = self.winner_announcement(winner_info)
+        if announcement:
+            result = '\n'.join([announcement, result])
+        return self.good_bye.format(result)
+
+    def winner_announcement(self, winner_info):
+        return 'The winner is {username} with his bet {bet}'.format(winner_info)
+
+    def username(self, userid):
+        return 'petr'
+
+    def on_posted(self, message):
+        if self.game is not None:
+            self.invitation_time = message['ts']
+
+    @property
+    def invitation(self):
+        verifier_hash = self.easy_hash(self.game.verifier)
+        return ("Everyone picks a number between 1 and 100.\n"
+                "Then target number is posted.\n"
+                "The one, who picked number closest to target wins\n"
+                "Verification hash for this game is {0}".format(verifier_hash))
+
+    def game_messages(self):
+        return []
+
+    def easy_hash(self, text):
+        return hashlib.md5(text.encode('utf-8')).hexdigest()[:6]
+
+
 class FateGame(object):
-    current_game = None
-    triggers = 'fate', 'done'
+    """
+    Fair lottery for chats
+
+    FateGame generates random number and posts it's hash.
+    Users try to guess it, by posting messages.
+    FateGame posts generated number and determines the winner.
+
+    """
     good_bye = ("{0}\nYou can check target number by executing following code:\n"
                 "python -c 'import hashlib; print(hashlib.md5(\"{0}\".encode(\"utf-8\")).hexdigest()[:6])'")
     re_numbers = re.compile(r'\b\d+\b')
     verifier_ptrn = 'Fate game #{game_id} target number: {number}'
 
     def __init__(self):
-        self.invitation_time = None
         self.setup_game()
 
-    @staticmethod
-    def start():
-        FateGame.current_game = FateGame()
-        return FateGame.current_game
-
-    @staticmethod
-    def on_message(message):
-        if 'done' in message:
-            if FateGame.current_game is not None:
-                result = FateGame.current_game.compose_result()
-                FateGame.current_game = None
-                return result
-        elif 'fate' in message:
-            return FateGame.start().invitation
-
-    def finish(self, messages):
-        return self.compose_result(messages)
-
-    def compose_result(self, messages):
-        result = self.verifier
-        winner = self.winner_username(self.winner_info(messages))
-        if winner:
-            result = '\n'.join([winner, result])
-        return self.good_bye.format(result)
-
-    def winner_info(self, messages):
-        if self.invitation_time is not None:
-            bets = self.parse_bets(messages)
-            if bets:
-                user_id, user_bet = self.winner_bet(bets)
-                return {
-                    'user_id': user_id,
-                    'bet': user_bet,
-                }
-
-    def winner_announcement(self, winner_info):
-        return 'The winner is {username} with his bet {bet}'.format(winner_info)
+    def determine_winner(self, messages):
+        bets = self.parse_bets(messages)
+        if bets:
+            user_id, user_bet = self.winner_bet(bets)
+            return {
+                'user_id': user_id,
+                'bet': user_bet,
+            }
 
     def winner_bet(self, bets):
         return sorted(bets.items(), key=lambda a: abs(a[1] - self.target_nbr))[0]
@@ -82,23 +118,7 @@ class FateGame(object):
     def is_valid_bet(self, number):
         return 0 < number < 100
 
-    @staticmethod
-    def on_posted(message):
-        if FateGame.current_game is not None:
-            FateGame.current_game.invitation_time = message['ts']
-
     def setup_game(self):
         self.game_id = random.randint(1, 9999)
         self.target_nbr = random.randint(1, 100)
         self.verifier = self.verifier_ptrn.format({'game_id': self.game_id, 'number': self.target_nbr})
-
-    @property
-    def invitation(self):
-        verifier_hash = self.easy_hash(self.verifier)
-        return ("Everyone picks a number between 1 and 100.\n"
-                "Then target number is posted.\n"
-                "The one, who picked number closest to target wins\n"
-                "Verification hash for this game is {0}".format(verifier_hash))
-
-    def easy_hash(self, text):
-        return hashlib.md5(text.encode('utf-8')).hexdigest()[:6]
