@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import datetime
 import functools
 import hashlib
@@ -42,9 +44,13 @@ def weekday(func):
     return wrapper
 
 
-def post(message):
+def post(message, color=None):
     logger.debug('Posting to %r message %r', CHANNEL_ID, message)
-    return slack.chat.post_message(CHANNEL_ID, message, username='Stupid')
+    if not color:
+        return slack.chat.post_message(CHANNEL_ID, message, username='Stupid')
+    else:
+        return slack.chat.post_message(CHANNEL_ID, "", username='Stupid',
+                                       attachments=[{'text': message, 'fallback': message, 'color': color}])
 
 
 def channel_info(name):
@@ -104,7 +110,7 @@ class Reader(object):
 
 @weekday
 def go_home():
-    return post('Russian, go home')
+    return post("Russian, go home", color='warning')
 
 
 @weekday
@@ -112,7 +118,7 @@ def eat_some():
     users = {user_id: user_name(user_id)
              for user_id in channel_info(CHANNEL_NAME)['members']
              if user_id != MY_ID}
-    response = post("Eat some! But be aware: it's {0}".format(weather.report()))
+    response = post("Eat some! But be aware: it's {0}".format(weather.report()), color='warning')
     logger.debug('Posted %r', response)
     announce_ts = float(response['message']['ts'])
     logger.debug('Scheduling ask_for_reply for %r after %r',
@@ -155,7 +161,7 @@ def ask_for_reply(users, announce_ts):
 def post_quote():
     registry = QuotesDatabase()
     quote = registry.get_random()
-    post(quote.text)
+    post(">>>" + quote.text)
     registry.mark_as_shown(quote)
 
 
