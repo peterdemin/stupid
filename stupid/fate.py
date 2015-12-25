@@ -3,36 +3,47 @@ import random
 import re
 import logging
 
+from stupid.chatbot import ChatBot, trigger
 
 logger = logging.getLogger('stupid.fate')
 
+FINISH_PTRN = """
+{0}
+You can check target number by executing following code:
+python -c 'import hashlib; print(hashlib.md5("{0}".encode("utf-8")).hexdigest()[:6])'
+""".strip()
 
-class FateGameBot(object):
+RULES_PTRN = """
+Everyone picks a number between 1 and 100.
+Then target number is posted.
+The one, who picked number closest to target wins
+Verification hash for this game is {hash}
+""".strip()
+
+VERIFIER_PTRN = 'Fate game #{game_id} target number: {number}'
+
+
+class FateGameBot(ChatBot):
     """
     Helper class, that adapts FateGame to Slack chat
     """
-    finish_ptrn = ("{0}\n"
-                   "You can check target number by executing following code:\n"
-                   "python -c 'import hashlib; print(hashlib.md5(\"{0}\".encode(\"utf-8\")).hexdigest()[:6])'")
 
     def __init__(self):
-        self.triggers = 'fate', 'done'
         self.game = None
         self.invitation_time = None
 
-    def on_message(self, message):
-        if 'done' in message:
-            if self.game is not None:
-                return self.on_done()
-        elif 'fate' in message:
-            self.game = FateGame()
-            return self.game.invitation
-
+    @trigger
     def on_done(self):
-        winner_info = self.game.determine_winner(self.game_messages())
-        result = self.game.compose_result(winner_info)
-        self.game = None
-        return result
+        if self.game is not None:
+            winner_info = self.game.determine_winner(self.game_messages())
+            result = self.compose_result(winner_info)
+            self.game = None
+            return result
+
+    @trigger
+    def on_fate(self):
+        self.game = FateGame()
+        return self.game.invitation
 
     def compose_result(self, winner_info):
         result = self.verifier
@@ -45,9 +56,6 @@ class FateGameBot(object):
     def winner_announcement(self, winner_info):
         return 'The winner is {username} with his bet {bet}'.format(winner_info)
 
-    def username(self, userid):
-        return 'petr'
-
     def on_posted(self, message):
         if self.game is not None:
             self.invitation_time = message['ts']
@@ -59,9 +67,6 @@ class FateGameBot(object):
                 "Then target number is posted.\n"
                 "The one, who picked number closest to target wins\n"
                 "Verification hash for this game is {0}".format(verifier_hash))
-
-    def game_messages(self):
-        return []
 
     def easy_hash(self, text):
         return hashlib.md5(text.encode('utf-8')).hexdigest()[:6]
@@ -79,7 +84,6 @@ class FateGame(object):
     good_bye = ("{0}\nYou can check target number by executing following code:\n"
                 "python -c 'import hashlib; print(hashlib.md5(\"{0}\".encode(\"utf-8\")).hexdigest()[:6])'")
     re_numbers = re.compile(r'\b\d+\b')
-    verifier_ptrn = 'Fate game #{game_id} target number: {number}'
 
     def __init__(self):
         self.setup_game()
@@ -89,7 +93,7 @@ class FateGame(object):
         if bets:
             user_id, user_bet = self.winner_bet(bets)
             return {
-                'user_id': user_id,
+                'user': user_id,
                 'bet': user_bet,
             }
 
@@ -115,10 +119,10 @@ class FateGame(object):
         return numbers
 
     @staticmethod
-    def is_valid_bet(self, number):
+    def is_valid_bet(number):
         return 0 < number < 100
 
     def setup_game(self):
         self.game_id = random.randint(1, 9999)
         self.target_nbr = random.randint(1, 100)
-        self.verifier = self.verifier_ptrn.format({'game_id': self.game_id, 'number': self.target_nbr})
+        self.verifier = VERIFIER_PTRN.format(game_id=self.game_id, number=self.target_nbr)

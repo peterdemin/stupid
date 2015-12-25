@@ -2,13 +2,13 @@ import sys
 from stupid import (
     schedule,
     Reader,
-    FateGame,
     eat_some,
     go_home,
     post_quote,
     run_forever,
     read_new_messages,
 )
+from stupid.fate import FateGame
 
 
 def setup_and_run():

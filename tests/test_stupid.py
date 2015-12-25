@@ -4,6 +4,7 @@ import pytest
 from mock import patch, ANY
 
 import stupid
+from stupid.main import main
 
 stupid.logging.disable(stupid.logging.CRITICAL)
 
@@ -18,13 +19,13 @@ def test_jobs():
 
 
 def test_quote():
-    quote = stupid.Quotes().get_random_quote()
+    quote = stupid.QuotesDatabase().get_random()
     stupid.logger.debug(quote)
 
 
-@patch('stupid.run_forever')
+@patch('stupid.main.run_forever')
 def test_main_runs_forever(run_forever):
-    stupid.main()
+    main()
     run_forever.assert_called_once_with()
 
 
@@ -49,12 +50,6 @@ class AskForReplyTestCase(unittest.TestCase):
         messages = [x[0][0] for x in post.call_args_list]
         assert len(messages) == 1
         assert '@b,' in messages[0]
-
-
-def test_fate():
-    fate = stupid.FateGame.start()
-    assert type(fate.invitation) == str
-    assert type(fate.verifier) == str
 
 
 @patch('stupid.read_new_messages', return_value=[{'text': '<@' + stupid.MY_ID + '> a', 'ts': 0}])
