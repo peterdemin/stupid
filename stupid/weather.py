@@ -1,5 +1,6 @@
 import logging
 import requests
+from stupid.settings import WEATHER_TOKEN
 
 
 logger = logging.getLogger(__name__)
@@ -7,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class WeatherForecast(object):
     def __init__(self, token=None):
-        self.token = token
+        self.token = token or WEATHER_TOKEN
 
     def report(self, latitude=38.9977, longitude=-77.0988):
         data = self.currently(latitude, longitude)
