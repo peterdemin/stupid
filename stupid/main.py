@@ -5,6 +5,7 @@ import time
 # from stupid.fate import FateGame
 import schedule
 from stupid.quotebot import QuoteBot
+from stupid.lunchbot import LunchBot
 from stupid.slackbroker import SlackBroker
 
 
@@ -25,7 +26,7 @@ def main():
 
 def setup_and_run():
     broker = SlackBroker()
-    bots = [QuoteBot(broker)]
+    bots = [QuoteBot(broker), LunchBot(broker)]
     run_forever(bots)
 
 

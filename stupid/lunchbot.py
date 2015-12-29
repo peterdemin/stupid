@@ -40,8 +40,7 @@ class LunchBot(ChatBot):
 
     def eat_some(self):
         response = self.broker.post(
-            "Who is going to eat? Beware, it's {0}"
-            .format(self.weather.report()),
+            "Who is going to eat? Beware, it's {0}".format(self.weather.report()),
             color='warning',
         )
         logger.debug('Posted %r', response)
