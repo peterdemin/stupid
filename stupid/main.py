@@ -1,14 +1,15 @@
-import logging
-# import sys
 import itertools
+import logging
 import time
-# from stupid.fate import FateGame
+
 import schedule
-from stupid.quotebot import QuoteBot
-from stupid.lunchbot import LunchBot
-from stupid.fate import FateGameBot
-from stupid.slackbroker import SlackBroker
+
 from stupid.chatbot import poll_broker
+from stupid.fate import FateGameBot
+from stupid.gohomebot import GoHomeBot
+from stupid.lunchbot import LunchBot
+from stupid.quotebot import QuoteBot
+from stupid.slackbroker import SlackBroker
 
 
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ def setup_and_run():
         QuoteBot(broker),
         LunchBot(broker),
         FateGameBot(broker),
+        GoHomeBot(broker),
     ]
     run_forever(broker, bots)
 
