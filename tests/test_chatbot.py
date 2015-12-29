@@ -18,6 +18,6 @@ def test_trigger_magic():
     chatbot = Dummy()
     assert 'hello' == chatbot.on_message({'text': 'hello'})
     assert chatbot.triggers == {
-        'hello': Dummy.on_hello,
-        'bye': Dummy.on_bye,
+        'hello': chatbot.on_hello,
+        'bye': chatbot.on_bye,
     }

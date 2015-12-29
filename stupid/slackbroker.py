@@ -14,12 +14,6 @@ class SlackBroker(object):
     MY_USERNAME = 'Stupid'
     slack.api_token = SLACK_TOKEN
 
-    def username(self, userid):
-        return 'Petr'
-
-    def messages(self):
-        return []
-
     def post(self, message, color=None):
         logger.debug('Posting to %r message %r', self.CHANNEL_ID, message)
         if not color:
@@ -36,14 +30,17 @@ class SlackBroker(object):
     def channel_id(self, name):
         return self.channel_info(name)['id']
 
+    def username(self, userid):
+        return self.user_name(userid)
 
     def user_name(self, user_id):
         return self.user_info(user_id)['name']
 
-
     def user_info(self, user_id):
         return slack.users.info(user_id)['user']
 
+    def messages(self, oldest_ts=None):
+        return self.read_new_messages(oldest_ts)
 
     def read_new_messages(self, oldest_ts=None):
         return slack.channels.history(self.CHANNEL_ID, oldest=oldest_ts)['messages']

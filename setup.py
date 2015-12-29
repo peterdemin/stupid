@@ -68,6 +68,6 @@ setup(
             'stupid = stupid.main:main',
         ]
     },
-    setup_requires=['nose>=1.0'],
+    setup_requires=['nose>=1.0', 'pytest-runner'],
     tests_require=get_requirements('requirements-dev.txt'),
 )

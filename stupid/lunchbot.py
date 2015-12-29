@@ -1,8 +1,6 @@
 import logging
 import time
 
-from schedule import Scheduler
-
 from stupid.chatbot import ChatBot, every_minute
 from stupid.utils import weekday
 from stupid.weather import WeatherForecast
@@ -17,7 +15,6 @@ class LunchBot(ChatBot):
     def __init__(self, *args, **kwargs):
         super(LunchBot, self).__init__(*args, **kwargs)
         self.weather = WeatherForecast()
-        self.schedule = Scheduler()
         self.schedule.every().day.at("11:55").do(self.eat_some)
         self.schedule.every().day.at("15:55").do(self.eat_some)
         self.announce_ts = None

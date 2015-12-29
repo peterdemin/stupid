@@ -1,6 +1,8 @@
 import inspect
 import logging
 
+from schedule import Scheduler
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,29 +18,35 @@ def every_minute(method):
 
 
 class ChatBot(object):
-    triggers = {}
-    pollers = []
-
     def __init__(self, broker=None):
+        self.schedule = Scheduler()
+        self.triggers = {}
+        self.pollers = []
+        self.introspect()
+        self.setup_pollers()
         self.broker = broker
         if self.broker is not None:
             self.username = self.broker.username
             self.messages = self.broker.messages
 
     def on_message(self, message):
-        if not self.triggers:
-            self.introspect()
         text = message['text'].lower()
         for trigger in self.triggers:
             if trigger in text:
-                return self.triggers[trigger](self)
+                return self.triggers[trigger]()
 
-    @classmethod
-    def introspect(cls):
-        for name, method in inspect.getmembers(cls, predicate=inspect.ismethod):
+    def setup_pollers(self):
+        for poller in self.pollers:
+            self.schedule.every().minute.do(poller)
+
+    def run_pending(self):
+        self.schedule.run_pending()
+
+    def introspect(self):
+        for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
             if name.startswith('on_'):
                 if getattr(method, 'is_trigger', False) is True:
                     event_name = name[3:]
-                    cls.triggers[event_name] = method
+                    self.triggers[event_name] = method
                 if getattr(method, 'every_minute', False) is True:
-                    cls.pollers.append(method)
+                    self.pollers.append(method)

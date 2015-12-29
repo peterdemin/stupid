@@ -103,7 +103,7 @@ class FateGame(object):
     def parse_bets(self, messages):
         bets = {}
         for message in messages:
-            current_bets = filter(self.is_valid_bet, self.parse_numbers(message['text']))
+            current_bets = list(filter(self.is_valid_bet, self.parse_numbers(message['text'])))
             if current_bets and message['user'] not in bets:
                 bets[message['user']] = current_bets[-1]
         return bets
