@@ -10,5 +10,5 @@ class QuoteBot(ChatBot):
 
     def post_quote(self):
         quote = self.registry.get_random()
-        self.post(">>>" + quote.text)
+        self.broker.post(">>>" + quote.text)
         self.registry.mark_as_shown(quote)
