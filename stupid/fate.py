@@ -8,9 +8,10 @@ from stupid.chatbot import ChatBot, trigger
 logger = logging.getLogger('stupid.fate')
 
 FINISH_PTRN = """
-{0}
+{announcement}
+{verifier}
 You can check target number by executing following code:
-python -c 'import hashlib; print(hashlib.md5("{0}".encode("utf-8")).hexdigest()[:6])'
+python -c 'import hashlib; print(hashlib.md5("{verifier}".encode("utf-8")).hexdigest()[:6])'
 """.strip()
 
 RULES_PTRN = """
@@ -28,7 +29,8 @@ class FateGameBot(ChatBot):
     Helper class, that adapts FateGame to Slack chat
     """
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(FateGameBot, self).__init__(*args, **kwargs)
         self.game = None
         self.invitation_time = None
 
@@ -36,25 +38,29 @@ class FateGameBot(ChatBot):
     def on_done(self):
         if self.game is not None:
             winner_info = self.game.determine_winner(self.game_messages())
-            result = self.compose_result(winner_info)
-            self.game = None
-            return result
+            if winner_info:
+                result = self.compose_result(winner_info)
+                self.game = None
+                return result
 
     @trigger
     def on_fate(self):
         self.game = FateGame()
-        return self.game.invitation
+        return self.invitation
+
+    def game_messages(self):
+        return self.broker.messages(self.invitation_time)
 
     def compose_result(self, winner_info):
-        result = self.verifier
-        winner_info['username'] = self.username(winner_info['userid'])
+        winner_info['username'] = self.username(winner_info['user'])
         announcement = self.winner_announcement(winner_info)
-        if announcement:
-            result = '\n'.join([announcement, result])
-        return self.good_bye.format(result)
+        return FINISH_PTRN.format(
+            announcement=announcement,
+            verifier=self.game.verifier,
+        ).strip()
 
     def winner_announcement(self, winner_info):
-        return 'The winner is {username} with his bet {bet}'.format(winner_info)
+        return 'The winner is :medal: {username} with his bet {bet}'.format(**winner_info)
 
     def on_posted(self, message):
         if self.game is not None:
@@ -81,8 +87,6 @@ class FateGame(object):
     FateGame posts generated number and determines the winner.
 
     """
-    good_bye = ("{0}\nYou can check target number by executing following code:\n"
-                "python -c 'import hashlib; print(hashlib.md5(\"{0}\".encode(\"utf-8\")).hexdigest()[:6])'")
     re_numbers = re.compile(r'\b\d+\b')
 
     def __init__(self):
@@ -91,9 +95,9 @@ class FateGame(object):
     def determine_winner(self, messages):
         bets = self.parse_bets(messages)
         if bets:
-            user_id, user_bet = self.winner_bet(bets)
+            user, user_bet = self.winner_bet(bets)
             return {
-                'user': user_id,
+                'user': user,
                 'bet': user_bet,
             }
 

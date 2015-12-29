@@ -6,7 +6,9 @@ import time
 import schedule
 from stupid.quotebot import QuoteBot
 from stupid.lunchbot import LunchBot
+from stupid.fate import FateGameBot
 from stupid.slackbroker import SlackBroker
+from stupid.chatbot import poll_broker
 
 
 logger = logging.getLogger(__name__)
@@ -26,14 +28,20 @@ def main():
 
 def setup_and_run():
     broker = SlackBroker()
-    bots = [QuoteBot(broker), LunchBot(broker)]
-    run_forever(bots)
+    bots = [
+        QuoteBot(broker),
+        LunchBot(broker),
+        FateGameBot(broker),
+    ]
+    run_forever(broker, bots)
 
 
-def run_forever(bots):
+def run_forever(broker, bots):
     for i in itertools.count(0):
         for bot in bots:
             bot.run_pending()
+        if i % 5 == 0:
+            poll_broker(broker, bots)
         if i % 600 == 0:
             logger.info('Iteration #%d', i)
             logger.info(render_jobs())

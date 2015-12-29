@@ -33,7 +33,14 @@ class ChatBot(object):
         text = message['text'].lower()
         for trigger in self.triggers:
             if trigger in text:
-                return self.triggers[trigger]()
+                response = self.triggers[trigger]()
+                if response is not None:
+                    self.on_posted(self.broker.post(response)['message'])
+                return response
+
+    def on_posted(self, message):
+        """Called with broker response to just posted message"""
+        return
 
     def setup_pollers(self):
         for poller in self.pollers:
@@ -50,3 +57,9 @@ class ChatBot(object):
                     self.triggers[event_name] = method
                 if getattr(method, 'every_minute', False) is True:
                     self.pollers.append(method)
+
+
+def poll_broker(broker, bots):
+    for message in broker.poll_channel():
+        for bot in bots:
+            bot.on_message(message)

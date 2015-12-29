@@ -1,4 +1,7 @@
+from mock.mock import MagicMock
+
 from stupid.chatbot import ChatBot, trigger
+from stupid.slackbroker import SlackBroker
 
 
 class Dummy(ChatBot):
@@ -15,9 +18,11 @@ class Dummy(ChatBot):
 
 
 def test_trigger_magic():
-    chatbot = Dummy()
-    assert 'hello' == chatbot.on_message({'text': 'hello'})
+    broker = MagicMock(spec=SlackBroker)
+    chatbot = Dummy(broker)
     assert chatbot.triggers == {
         'hello': chatbot.on_hello,
         'bye': chatbot.on_bye,
     }
+    assert 'hello' == chatbot.on_message({'text': 'hello'})
+    broker.post.assert_called_once_with('hello')
