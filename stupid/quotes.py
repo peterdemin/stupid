@@ -4,10 +4,10 @@ import logging.config
 import random
 import sqlite3
 from collections import namedtuple
-from six import text_type
 
 import requests
 from bs4 import BeautifulSoup
+from six import text_type
 
 
 logger = logging.getLogger('stupid.quotes')
@@ -40,10 +40,10 @@ class BashOrgScrapper(object):
     def parse_quote(self, stat, content):
         quote_idx = int(stat.find_all("a")[0].contents[0].getText().lstrip('#'))
         # votes = stat.find_all("font")[0].getText()
-        lines = [row.replace("\r", "").replace("\n", "")
+        lines = [row.replace("\r", "").replace("\n", "").strip()
                  for row in content
                  if text_type(row) != "<br/>"]
-        return Quote(quote_idx, '\n'.join(lines), False)
+        return Quote(quote_idx, '\n'.join(filter(None, lines)), False)
 
 
 class QuotesDatabase(object):

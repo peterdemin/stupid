@@ -1,7 +1,9 @@
-.env
-.ropeproject
-quotes.sqlite3
 *.pyc
+*.swp
 .DS_Store
 .cache
 .coverage
+htmlcov
+.env
+.ropeproject
+quotes.sqlite3

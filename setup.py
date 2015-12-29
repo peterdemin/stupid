@@ -9,7 +9,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-version = "1.1.0"
+version = "1.3.1"
 
 if sys.argv[-1] == 'publish':
     try:
@@ -68,6 +68,6 @@ setup(
             'stupid = stupid.main:main',
         ]
     },
-    setup_requires=['nose>=1.0'],
+    setup_requires=['nose>=1.0', 'pytest-runner'],
     tests_require=get_requirements('requirements-dev.txt'),
 )

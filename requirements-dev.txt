@@ -1,6 +1,6 @@
-setuptools_scm
 pytest
 pytest-runner
+pytest-cov
 mock
 nose
 ipdb
