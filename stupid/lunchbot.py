@@ -35,8 +35,6 @@ class LunchBot(ChatBot):
             if disable:
                 self.ask_for_reply_after = None
                 self.users_to_ask = []
-        else:
-            self.schedule.run_pending()
 
     def eat_some(self):
         response = self.broker.post(
