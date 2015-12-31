@@ -1,6 +1,7 @@
 pytest
 pytest-runner
 pytest-cov
+pytest-pep8
 mock
 nose
 ipdb
