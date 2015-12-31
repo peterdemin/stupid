@@ -7,6 +7,8 @@ python:
   - "3.5"
   - "3.5-dev" # 3.5 development branch
   - "nightly" # currently points to 3.6-dev
+env:
+  - STUPID_TOKEN=X STUPID_WEATHER_TOKEN=Y
 # command to install dependencies
 install: "pip install -r requirements.txt -r requirements-dev.txt"
 # command to run tests
