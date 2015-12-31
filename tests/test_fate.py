@@ -2,7 +2,7 @@ import pytest
 
 from stupid.fate import FateGame, FateGameBot
 from stupid.slackbroker import SlackBroker
-from mock.mock import MagicMock
+from mock import MagicMock
 
 
 def test_fate():

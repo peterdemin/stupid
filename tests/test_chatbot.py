@@ -1,4 +1,4 @@
-from mock.mock import MagicMock
+from mock import MagicMock
 
 from stupid.chatbot import ChatBot, trigger
 from stupid.slackbroker import SlackBroker

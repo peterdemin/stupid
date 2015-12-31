@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.5-dev" # 3.5 development branch
+env:
+  - STUPID_TOKEN=X STUPID_WEATHER_TOKEN=Y
+# command to install dependencies
+install: "pip install -r requirements.txt -r requirements-dev.txt"
+# command to run tests
+script:
+  - py.test --doctest-modules --pep8 stupid -v --cov stupid --cov-report term-missing
+after_success:
+  - coveralls

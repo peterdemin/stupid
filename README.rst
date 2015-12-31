@@ -1,6 +1,11 @@
 ===============================
 stupid
 ===============================
+.. image:: https://badge.fury.io/py/stupid.png
+    :target: http://badge.fury.io/py/stupid
+
+.. image:: https://travis-ci.org/peterdemin/stupid.png?branch=master
+    :target: https://travis-ci.org/peterdemin/stupid
 
 Install and run::
 
