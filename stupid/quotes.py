@@ -49,8 +49,8 @@ class BashOrgScrapper(object):
 class QuotesDatabase(object):
     db_file = "quotes.sqlite3"
 
-    def __init__(self):
-        self.db = sqlite3.connect(self.db_file)
+    def __init__(self, db_file=None):
+        self.db = sqlite3.connect(db_file or self.db_file)
         self.create_table()
 
     def add(self, quote):

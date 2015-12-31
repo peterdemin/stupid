@@ -2,7 +2,18 @@ from stupid.quotes import QuotesDatabase, BashOrgScrapper, Quote
 
 
 def test_quote_random_smoke():
-    QuotesDatabase().get_random()
+    # setup
+    db = QuotesDatabase(':memory:')
+    quotes = (
+        Quote(1, 'a', False),
+        Quote(2, 'b', False),
+    )
+    for quote in quotes:
+        db.add(quote)
+    # act
+    random_quote = db.get_random()
+    # assert
+    assert random_quote in quotes
 
 
 def test_scrapper():
