@@ -58,7 +58,7 @@ class QuotesDatabase(object):
             "SELECT * FROM quotes WHERE id=?",
             (quote.id,)
         ).fetchall()
-        if len(same_id_quotes):
+        if same_id_quotes:
             logger.debug("Skipping quote #%s as it is already in the DB",
                          quote.id)
             return
