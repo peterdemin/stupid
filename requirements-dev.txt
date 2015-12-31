@@ -5,3 +5,4 @@ mock
 nose
 ipdb
 ipdbplugin
+python-coveralls

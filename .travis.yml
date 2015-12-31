@@ -11,4 +11,7 @@ env:
 # command to install dependencies
 install: "pip install -r requirements.txt -r requirements-dev.txt"
 # command to run tests
-script: py.test
+script:
+  - py.test --doctest-modules --pep8 stupid -v --cov stupid --cov-report term-missing
+after_success:
+  - coveralls
