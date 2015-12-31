@@ -27,7 +27,7 @@ class SlackBroker(object):
 
     def channel_info(self, name):
         for channel_info in slack.channels.list()['channels']:
-            if channel_info['name'] == 'loud-launches':
+            if channel_info['name'] == name:
                 return channel_info
 
     def channel_id(self, name):
@@ -60,4 +60,4 @@ class SlackBroker(object):
                 yield message
 
     def is_from_me(self, message):
-        return message.get('username', None) == self.MY_USERNAME
+        return message.get('username') == self.MY_USERNAME

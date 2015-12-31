@@ -60,7 +60,7 @@ class LunchBot(ChatBot):
         """
         logger.debug("Asking for reply")
         # Bot messages do not have 'user' field
-        replied_user_ids = {x.get('user', None) for x in self.broker.read_new_messages(self.announce_ts)}
+        replied_user_ids = {x.get('user') for x in self.broker.read_new_messages(self.announce_ts)}
         logger.debug("Users replied after announcement: %r", replied_user_ids)
         if replied_user_ids.intersection(self.users_to_ask):
             # At least one user replied

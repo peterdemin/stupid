@@ -18,13 +18,13 @@ if sys.argv[-1] == 'publish':
         raise ImportError("Fix: pip install wheel")
     os.system('python setup.py sdist bdist_wheel upload')
     print("You probably want to also tag the version now:")
-    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git tag -a {0} -m 'version {0}'".format(version))
     print("  git push --tags")
     sys.exit()
 
 if sys.argv[-1] == 'tag':
     print("Tagging the version on github:")
-    os.system("git tag -a %s -m 'version %s'" % (version, version))
+    os.system("git tag -a {0} -m 'version {0}'".format(version))
     os.system("git push --tags")
     sys.exit()
 
