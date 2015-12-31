@@ -24,7 +24,7 @@ class AskForReplyTestCase(unittest.TestCase):
         self.bot.ask_for_reply_after = time.time()
         self.bot.users_to_ask = {1: 'a', 2: 'b'}
         retval = self.bot.ask_for_reply()
-        assert retval == True
+        assert retval is True
         self.bot.broker.read_new_messages.assert_called_once_with(ANY)
         messages = [x[0][0] for x in self.bot.broker.post.call_args_list]
         assert len(messages) == 1
