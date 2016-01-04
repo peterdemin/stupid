@@ -1,5 +1,9 @@
 import functools
 import datetime
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def weekday(func):
@@ -7,4 +11,7 @@ def weekday(func):
     def wrapper(*args, **kwargs):
         if datetime.datetime.now().weekday() in range(0, 5):
             return func(*args, **kwargs)
+        else:
+            logger.debug("Skipping {0} since it is not a weekday".format(func))
+
     return wrapper

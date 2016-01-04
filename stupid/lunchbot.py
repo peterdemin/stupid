@@ -36,6 +36,7 @@ class LunchBot(ChatBot):
                 self.ask_for_reply_after = None
                 self.users_to_ask = []
 
+    @weekday
     def eat_some(self):
         response = self.broker.post(
             "Who is going to eat? Beware, it's {0}".format(self.weather.report()),
