@@ -11,11 +11,35 @@ class WeatherForecast(object):
         self.token = token or WEATHER_TOKEN
 
     def report(self, latitude=38.9977, longitude=-77.0988):
+        """
+        Example output:
+        {
+            "time": 1451923306,
+            "summary": "Mostly Cloudy",
+            "icon": "partly-cloudy-day",
+            "nearestStormDistance": 12,
+            "nearestStormBearing": 175,
+            "precipIntensity": 0,
+            "precipProbability": 0,
+            "temperature": 32.54,
+            "apparentTemperature": 25.88,
+            "dewPoint": 15.6,
+            "humidity": 0.49,
+            "windSpeed": 7.4,
+            "windBearing": 319,
+            "visibility": 10,
+            "cloudCover": 0.66,
+            "pressure": 1019.91,
+            "ozone": 337.97
+        }
+        """
         data = self.currently(latitude, longitude)
-        return "{0:.0f} \u00B0F at {1:.1f} mph wind".format(
-            data['apparentTemperature'],
-            data['windSpeed'],
-        )
+        result = "{0:.0f} \u00B0F".format(data['apparentTemperature'])
+        if data['windSpeed'] >= 2.0:
+            result += " at {0:.1f} mph wind".format(data['windSpeed'])
+        if data['precipProbability'] > 0:
+            result += " and I am {0:.0f}% sure it is raining".format(data['precipProbability'] * 100)
+        return result
 
     def currently(self, latitude, longitude):
         return self.forecast(latitude, longitude).json()['currently']
