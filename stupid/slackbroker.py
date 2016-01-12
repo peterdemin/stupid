@@ -1,5 +1,6 @@
 import logging
 import slack.channels
+import slack.groups
 import slack.chat
 from stupid.settings import SLACK_TOKEN
 
@@ -9,7 +10,7 @@ logger = logging.getLogger('stupid')
 
 class SlackBroker(object):
     CHANNEL_NAME = 'loud-launches'
-    CHANNEL_ID = 'C0G8JR6TE'  # channel_id(CHANNEL_NAME)
+    CHANNEL_ID = 'G0J9HTX1S'  # channel_id(CHANNEL_NAME)
     MY_ID = 'U0GN5LAQ3'
     MY_USERNAME = 'Stupid'
     slack.api_token = SLACK_TOKEN
@@ -46,7 +47,7 @@ class SlackBroker(object):
         return self.read_new_messages(oldest_ts)
 
     def read_new_messages(self, oldest_ts=None):
-        return slack.channels.history(self.CHANNEL_ID, oldest=oldest_ts)['messages']
+        return slack.groups.history(self.CHANNEL_ID, oldest=oldest_ts)['messages']
 
     def poll_channel(self):
         messages = self.read_new_messages(self.oldest_ts)
