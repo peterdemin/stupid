@@ -29,7 +29,8 @@ class ChatBot(object):
             self.username = self.broker.username
             self.messages = self.broker.messages
 
-    def on_message(self, message):
+    def on_message(self, iteration_nbr, message):
+        self.iteration_nbr = iteration_nbr
         text = message['text'].lower()
         for trigger in self.triggers:
             if trigger in text:
@@ -59,7 +60,7 @@ class ChatBot(object):
                     self.pollers.append(method)
 
 
-def poll_broker(broker, bots):
+def poll_broker(iteration_nbr, broker, bots):
     for message in broker.poll_channel():
         for bot in bots:
-            bot.on_message(message)
+            bot.on_message(iteration_nbr, message)

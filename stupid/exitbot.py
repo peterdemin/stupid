@@ -14,8 +14,11 @@ class ExitBot(ChatBot):
 
     @trigger
     def on_exit(self):
-        logger.info("Exiting on demand")
-        return sys.exit(0)
+        if self.iteration_nbr == 0:
+            return "Restarted successfuly"
+        else:
+            logger.info("Exiting on demand")
+            sys.exit(0)
 
     @trigger
     def on_restart(self):

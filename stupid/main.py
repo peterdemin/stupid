@@ -45,7 +45,7 @@ def run_forever(broker, bots):
         for bot in bots:
             bot.run_pending()
         if i % 5 == 0:
-            poll_broker(broker, bots)
+            poll_broker(i, broker, bots)
         if i % 600 == 0:
             logger.info('Iteration #%d', i)
             logger.info(render_jobs())
