@@ -10,6 +10,7 @@ from stupid.gohomebot import GoHomeBot
 from stupid.lunchbot import LunchBot
 from stupid.quotebot import QuoteBot
 from stupid.slackbroker import SlackBroker
+from stupid.exitbot import ExitBot
 
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,7 @@ def setup_and_run():
         LunchBot(broker),
         FateGameBot(broker),
         GoHomeBot(broker),
+        ExitBot(broker),
     ]
     run_forever(broker, bots)
 
