@@ -30,6 +30,9 @@ class SlackBroker(object):
         for channel_info in slack.channels.list()['channels']:
             if channel_info['name'] == name:
                 return channel_info
+        for channel_info in slack.groups.list()['groups']:
+            if channel_info['name'] == name:
+                return channel_info
 
     def channel_id(self, name):
         return self.channel_info(name)['id']
@@ -47,7 +50,11 @@ class SlackBroker(object):
         return self.read_new_messages(oldest_ts)
 
     def read_new_messages(self, oldest_ts=None):
-        return slack.groups.history(self.CHANNEL_ID, oldest=oldest_ts)['messages']
+        if self.CHANNEL_ID.startswith('G'):
+            channel_or_group = slack.groups
+        else:
+            channel_or_group = slack.channels
+        return channel_or_group.history(self.CHANNEL_ID, oldest=oldest_ts)['messages']
 
     def poll_channel(self):
         messages = self.read_new_messages(self.oldest_ts)
