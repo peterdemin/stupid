@@ -21,9 +21,9 @@ class SlackBroker(object):
     def post(self, message, color=None):
         logger.debug('Posting to %r message %r', self.CHANNEL_ID, message)
         if not color:
-            return slack.chat.post_message(self.CHANNEL_ID, message, username='Stupid')
+            return slack.chat.post_message(self.CHANNEL_ID, message, username='Stupid', link_names=True)
         else:
-            return slack.chat.post_message(self.CHANNEL_ID, "", username='Stupid',
+            return slack.chat.post_message(self.CHANNEL_ID, "", username='Stupid', link_names=True,
                                            attachments=[{'text': message, 'fallback': message, 'color': color}])
 
     def channel_info(self, name):
