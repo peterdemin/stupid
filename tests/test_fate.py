@@ -32,7 +32,7 @@ def test_chat_scenario():
     broker = MagicMock(spec=SlackBroker)
     broker.username.return_value = 'U'
     bot = FateGameBot(broker)
-    rules = bot.on_message({"user": "x", "text": "@stupid: determine our fate"})
+    rules = bot.on_message(1, {"user": "x", "text": "@stupid: determine our fate"})
     assert bot.game is not None
     assert 'picks a number' in rules
     broker.post.assert_called_once_with(rules)
@@ -41,7 +41,7 @@ def test_chat_scenario():
         {"user": "b", "text": "50"},
         {"user": "c", "text": "75"},
     ]
-    game_over = bot.on_message({"user": "x", "text": "@stupid: we're done"})
+    game_over = bot.on_message(2, {"user": "x", "text": "@stupid: we're done"})
     assert 'The winner is' in game_over
 
 

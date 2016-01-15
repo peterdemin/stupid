@@ -24,5 +24,5 @@ def test_trigger_magic():
         'hello': chatbot.on_hello,
         'bye': chatbot.on_bye,
     }
-    assert 'hello' == chatbot.on_message({'text': 'hello'})
+    assert 'hello' == chatbot.on_message(1, {'text': 'hello'})
     broker.post.assert_called_once_with('hello')
