@@ -38,7 +38,9 @@ class WeatherForecast(object):
         if data['windSpeed'] >= 2.0:
             result += " at {0:.1f} mph wind".format(data['windSpeed'])
         if data['precipProbability'] > 0:
-            result += " and I am {0:.0f}% sure it is raining".format(data['precipProbability'] * 100)
+            result += " and I am {0:.0f}% sure it is {1}".format(
+                data['precipProbability'] * 100,
+                "raining" if data['temperature'] > 32.0 else "snowing")
         return result
 
     def currently(self, latitude, longitude):
