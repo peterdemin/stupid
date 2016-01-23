@@ -40,8 +40,8 @@ class HolydayBot(ChatBot):
         self.schedule.every().day.at('13:30').do(self.post_next_week_holyday)
         self.schedule.every().day.at('17:50').do(self.post_tomorrow_holyday)
         self.schedule.every().day.at('08:00').do(self.post_today_holyday)
-        self.holyday_dates = HOLYDAYS.keys()
-        self.holyday_titles = HOLYDAYS.values()
+        self.holyday_dates = list(HOLYDAYS.keys())
+        self.holyday_titles = list(HOLYDAYS.values())
 
     def post_today_holyday(self):
         title = self.today_holyday()
