@@ -3,11 +3,11 @@ from collections import OrderedDict
 
 import datetime
 
-from stupid.chatbot import ChatBot
+from stupid.chatbot import ChatBot, trigger
 
 
-# http://dchr.dc.gov/page/holyday-schedules
-HOLYDAYS = OrderedDict([
+# http://dchr.dc.gov/page/holiday-schedules
+HOLIDAYS = OrderedDict([
     (datetime.date(2016, 1, 1), "New Year's Day"),
     (datetime.date(2016, 1, 18), "Martin Luther King Jr. Day"),
     (datetime.date(2016, 2, 15), "Washington's Birthday"),
@@ -34,51 +34,61 @@ HOLYDAYS = OrderedDict([
 ])
 
 
-class HolydayBot(ChatBot):
+class HolidayBot(ChatBot):
     def __init__(self, *args, **kwargs):
-        super(HolydayBot, self).__init__(*args, **kwargs)
-        self.schedule.every().day.at('13:30').do(self.post_next_week_holyday)
-        self.schedule.every().day.at('17:50').do(self.post_tomorrow_holyday)
-        self.schedule.every().day.at('08:00').do(self.post_today_holyday)
-        self.holyday_dates = list(HOLYDAYS.keys())
-        self.holyday_titles = list(HOLYDAYS.values())
+        super(HolidayBot, self).__init__(*args, **kwargs)
+        self.schedule.every().day.at('13:30').do(self.post_next_week_holiday)
+        self.schedule.every().day.at('17:50').do(self.post_tomorrow_holiday)
+        self.schedule.every().day.at('08:00').do(self.post_today_holiday)
+        self.holiday_dates = list(HOLIDAYS.keys())
+        self.holiday_titles = list(HOLIDAYS.values())
 
-    def post_today_holyday(self):
-        title = self.today_holyday()
+    @trigger
+    def on_holiday(self):
+        index = bisect.bisect_left(self.holiday_dates, datetime.date.today())
+        hs = slice(index, index + 3)
+        lines = [
+            day.strftime('%A, %B %-d - {0}'.format(title))
+            for day, title in zip(self.holiday_dates[hs], self.holiday_titles[hs])
+        ]
+        return '\n'.join(lines)
+
+    def post_today_holiday(self):
+        title = self.today_holiday()
         if title is not None:
             return self.broker.post("Happy {0}! It is day off.".format(title),
                                     color='warning')
 
-    def post_tomorrow_holyday(self):
-        title = self.tomorrow_holyday()
+    def post_tomorrow_holiday(self):
+        title = self.tomorrow_holiday()
         if title is not None:
             return self.broker.post("Tomorrow is day off - {0}.".format(title),
                                     color='info')
 
-    def post_next_week_holyday(self):
+    def post_next_week_holiday(self):
         day = datetime.date.today() + datetime.timedelta(days=7)
-        title = self.holyday_title(day)
+        title = self.holiday_title(day)
         if title is not None:
             return self.broker.post("On the next week {0} is day off - {1}."
                                     .format(day.strftime("%A, %B %-d"), title),
                                     color='info')
 
-    def today_holyday(self):
-        return self.holyday_title(datetime.date.today())
+    def today_holiday(self):
+        return self.holiday_title(datetime.date.today())
 
-    def tomorrow_holyday(self):
+    def tomorrow_holiday(self):
         tomorrow = datetime.date.today() + datetime.timedelta(days=1)
-        return self.holyday_title(tomorrow)
+        return self.holiday_title(tomorrow)
 
-    def holyday_title(self, day):
-        holyday_date, holyday_title = self.previous_holyday(day)
-        if day == holyday_date:
-            return holyday_title
+    def holiday_title(self, day):
+        holiday_date, holiday_title = self.previous_holiday(day)
+        if day == holiday_date:
+            return holiday_title
 
-    def previous_holyday(self, from_date):
-        index = bisect.bisect_left(self.holyday_dates, from_date)
-        return self.holyday_dates[index], self.holyday_titles[index]
+    def previous_holiday(self, from_date):
+        index = bisect.bisect_left(self.holiday_dates, from_date)
+        return self.holiday_dates[index], self.holiday_titles[index]
 
-    def next_holyday(self, from_date):
-        index = bisect.bisect_right(self.holyday_dates, from_date)
-        return self.holyday_dates[index], self.holyday_titles[index]
+    def next_holiday(self, from_date):
+        index = bisect.bisect_right(self.holiday_dates, from_date)
+        return self.holiday_dates[index], self.holiday_titles[index]
