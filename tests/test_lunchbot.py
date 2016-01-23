@@ -1,3 +1,4 @@
+from datetime import date
 import time
 import unittest
 from stupid.lunchbot import LunchBot
@@ -8,7 +9,9 @@ class AskForReplyTestCase(unittest.TestCase):
     def setUp(self):
         self.bot = LunchBot(broker=MagicMock())
 
-    def test_ask_for_reply_timeout(self):
+    @patch("stupid.utils.datetime.date")
+    def test_ask_for_reply_timeout(self, mock_date):
+        mock_date.today.return_value = date(2016, 1, 4)  # Monday
         self.bot.ask_for_reply_after = 0
         self.bot.on_timeout()
         assert self.bot.ask_for_reply_after is None
