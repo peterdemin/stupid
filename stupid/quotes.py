@@ -85,7 +85,8 @@ class QuotesDatabase(object):
         )
 
     def random_unshown_id(self):
-        ids = self.cursor.execute("SELECT id FROM quotes WHERE shown=0").fetchall()
+        ids = [x[0]
+               for x in self.cursor.execute("SELECT id FROM quotes WHERE shown=0").fetchall()]
         return random.choice(ids)
 
     def mark_as_shown(self, quote):
