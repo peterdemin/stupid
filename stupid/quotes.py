@@ -79,7 +79,10 @@ class QuotesDatabase(object):
         self.db.commit()
 
     def fetch(self, quote_id):
-        return Quote(*self.cursor.execute("SELECT id, text, shown FROM quotes WHERE id=?", quote_id).fetchone())
+        return Quote(
+            *self.cursor.execute("SELECT id, text, shown FROM quotes WHERE id=?",
+                                 (str(quote_id),)).fetchone()
+        )
 
     def random_unshown_id(self):
         ids = self.cursor.execute("SELECT id FROM quotes WHERE shown=0").fetchall()
@@ -87,6 +90,7 @@ class QuotesDatabase(object):
 
     def mark_as_shown(self, quote):
         self.cursor.execute("UPDATE quotes SET shown=1 WHERE id=?", (str(quote.id),))
+        self.db.commit()
 
     @property
     def cursor(self):
