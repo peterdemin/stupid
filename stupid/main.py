@@ -6,7 +6,6 @@ import schedule
 
 from stupid.chatbot import poll_broker
 from stupid.fate import FateGameBot
-from stupid.gohomebot import GoHomeBot
 from stupid.lunchbot import LunchBot
 from stupid.quotebot import QuoteBot
 from stupid.slackbroker import SlackBroker
@@ -35,7 +34,6 @@ def setup_and_run():
         QuoteBot(broker),
         LunchBot(broker),
         FateGameBot(broker),
-        GoHomeBot(broker),
         ExitBot(broker),
         HolidayBot(broker),
     ]
