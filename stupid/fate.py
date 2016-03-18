@@ -114,7 +114,7 @@ class FateGame(object):
 
     def parse_bets(self, messages):
         bets = OrderedDict()
-        for message in messages:
+        for message in reversed(messages):
             if 'user' in message and 'text' in message:  # filter out bots
                 user, text = message['user'], message['text']
                 current_bets = list(filter(self.is_valid_bet, self.parse_numbers(text)))
