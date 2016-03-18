@@ -2,6 +2,7 @@ import hashlib
 import random
 import re
 import logging
+from collections import OrderedDict
 
 from stupid.chatbot import ChatBot, trigger
 
@@ -102,14 +103,25 @@ class FateGame(object):
             }
 
     def winner_bet(self, bets):
-        return sorted(bets.items(), key=lambda a: abs(a[1] - self.target_nbr))[0]
+        distances = sorted([(abs(bet - self.target_nbr), bet)
+                            for bet in bets.values()])
+        closest_bets = set([bet
+                            for distance, bet in distances
+                            if distance == distances[0][0]])
+        for user, bet in bets.items():
+            if bet in closest_bets:
+                return user, bet
 
     def parse_bets(self, messages):
-        bets = {}
+        bets = OrderedDict()
         for message in messages:
-            current_bets = list(filter(self.is_valid_bet, self.parse_numbers(message['text'])))
-            if current_bets and message['user'] not in bets:
-                bets[message['user']] = current_bets[-1]
+            if 'user' in message and 'text' in message:  # filter out bots
+                user, text = message['user'], message['text']
+                current_bets = list(filter(self.is_valid_bet, self.parse_numbers(text)))
+                if current_bets and user not in bets:
+                    if user in bets:
+                        del bets[user]
+                    bets[user] = current_bets[-1]
         return bets
 
     @staticmethod

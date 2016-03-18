@@ -28,6 +28,24 @@ def test_parse_bets():
     }
 
 
+def test_equal_bets():
+    game = FateGame()
+    info1 = game.determine_winner([
+        {'user': 'a', 'text': '50'},
+        {'user': 'b', 'text': '50'},
+        {'user': 'c', 'text': '50'},
+        {'user': 'd', 'text': '50'},
+    ])
+    assert info1 == {'user': 'a', 'bet': 50}
+    info2 = game.determine_winner([
+        {'user': 'd', 'text': '50'},
+        {'user': 'c', 'text': '50'},
+        {'user': 'b', 'text': '50'},
+        {'user': 'a', 'text': '50'},
+    ])
+    assert info2 == {'user': 'd', 'bet': 50}
+
+
 def test_chat_scenario():
     broker = MagicMock(spec=SlackBroker)
     broker.username.return_value = 'U'
