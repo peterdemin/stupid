@@ -1,7 +1,7 @@
 import logging
 import time
 
-from stupid.chatbot import ChatBot, every_minute
+from stupid.chatbot import ChatBot, every_minute, trigger
 from stupid.utils import weekday
 from stupid.weather import WeatherForecast
 
@@ -20,6 +20,10 @@ class LunchBot(ChatBot):
         self.announce_ts = None
         self.ask_for_reply_after = None
         self.users_to_ask = []
+
+    @trigger
+    def on_weather(self):
+        return self.weather.report()
 
     @every_minute
     @weekday
