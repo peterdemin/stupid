@@ -8,10 +8,9 @@ from stupid.chatbot import ChatBot, trigger
 
 # http://dchr.dc.gov/page/holiday-schedules
 HOLIDAYS = OrderedDict([
-    (datetime.date(2016, 1, 1), "New Year's Day"),
-    (datetime.date(2016, 1, 18), "Martin Luther King Jr. Day"),
-    (datetime.date(2016, 2, 15), "Washington's Birthday"),
-    (datetime.date(2016, 4, 15), "DC Emancipation Day"),
+    (datetime.date(2016, 1, 1), "New Year’s Day"),
+    (datetime.date(2016, 1, 18), "Birthday of Martin Luther King, Jr."),
+    (datetime.date(2016, 2, 15), "Washington’s Birthday"),
     (datetime.date(2016, 5, 30), "Memorial Day"),
     (datetime.date(2016, 7, 4), "Independence Day"),
     (datetime.date(2016, 9, 5), "Labor Day"),
@@ -19,18 +18,6 @@ HOLIDAYS = OrderedDict([
     (datetime.date(2016, 11, 11), "Veterans Day"),
     (datetime.date(2016, 11, 24), "Thanksgiving Day"),
     (datetime.date(2016, 12, 26), "Christmas Day"),
-    (datetime.date(2017, 1, 16), "Inauguration Day"),
-    (datetime.date(2017, 1, 2), "New Year's Day"),
-    (datetime.date(2017, 1, 20), "Martin Luther King Jr. Day"),
-    (datetime.date(2017, 2, 20), "Washington's Birthday"),
-    (datetime.date(2017, 4, 17), "DC Emancipation Day"),
-    (datetime.date(2017, 5, 29), "Memorial Day"),
-    (datetime.date(2017, 7, 4), "Independence Day"),
-    (datetime.date(2017, 9, 4), "Labor Day"),
-    (datetime.date(2017, 10, 9), "Columbus Day"),
-    (datetime.date(2017, 11, 10), "Veterans Day"),
-    (datetime.date(2017, 11, 23), "Thanksgiving Day"),
-    (datetime.date(2017, 12, 25), "Christmas Day"),
 ])
 
 
