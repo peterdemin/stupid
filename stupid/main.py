@@ -17,13 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    # if len(sys.argv) > 1:
-    #     if sys.argv[1] == 'read':
-    #         ts = None
-    #         if len(sys.argv) > 2:
-    #             ts = float(sys.argv[2])
-    #         sys.stdout.buffer.write(str(read_new_messages(ts)).encode('utf-8'))
-    #         return 0
     setup_and_run()
     return 0
 
@@ -44,7 +37,7 @@ def run_forever(broker, bots):
     for i in itertools.count(0):
         for bot in bots:
             bot.run_pending()
-        if i % 5 == 0:
+        if i % 3 == 0:
             poll_broker(i, broker, bots)
         if i % 600 == 0:
             logger.info('Iteration #%d', i)
