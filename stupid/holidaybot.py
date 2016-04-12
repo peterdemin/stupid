@@ -8,9 +8,9 @@ from stupid.chatbot import ChatBot, trigger
 
 # http://dchr.dc.gov/page/holiday-schedules
 HOLIDAYS = OrderedDict([
-    (datetime.date(2016, 1, 1), "New Year’s Day"),
+    (datetime.date(2016, 1, 1), "New Year's Day"),
     (datetime.date(2016, 1, 18), "Birthday of Martin Luther King, Jr."),
-    (datetime.date(2016, 2, 15), "Washington’s Birthday"),
+    (datetime.date(2016, 2, 15), "Washington's Birthday"),
     (datetime.date(2016, 5, 30), "Memorial Day"),
     (datetime.date(2016, 7, 4), "Independence Day"),
     (datetime.date(2016, 9, 5), "Labor Day"),
