@@ -1,3 +1,4 @@
+import datetime
 import logging
 import time
 
@@ -11,6 +12,10 @@ logger = logging.getLogger(__name__)
 
 class LunchBot(ChatBot):
     ASK_TIMEOUT = 15
+    EXCLUDE = {
+        "sobolevi": (datetime.datetime(2016, 05, 17), datetime.datetime(2016, 06, 1)),
+        "mikhailzakharov": (datetime.datetime(2010, 1, 1), datetime.datetime(2020, 1, 1)),
+    }
 
     def __init__(self, *args, **kwargs):
         super(LunchBot, self).__init__(*args, **kwargs)
@@ -49,9 +54,21 @@ class LunchBot(ChatBot):
         logger.debug('Posted %r', response)
         self.announce_ts = float(response['message']['ts'])
         self.ask_for_reply_after = self.announce_ts + 60 * 3
-        self.users_to_ask = self.users_on_channel()
+        self.users_to_ask = self.dont_mention(self.users_on_channel())
         logger.debug('Scheduling ask_for_reply for %r after %r',
                      self.users_to_ask, self.ask_for_reply_after)
+
+    def dont_mention(self, users):
+        now = datetime.datetime.now()
+        to_keep = set()
+        for user in users:
+            if user in self.EXCLUDE:
+                if self.EXCLUDE[user][0] <= now < self.EXCLUDE[user][1]:
+                    continue
+            to_keep.add(user)
+        return {k: v
+                for k, v in users.items()
+                if k in to_keep}
 
     def users_on_channel(self):
         return {user_id: self.username(user_id)
