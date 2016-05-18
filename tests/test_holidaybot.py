@@ -21,7 +21,7 @@ def test_next_week_holiday_announcement(mock_date):
     bot = HolidayBot(broker=broker)
     bot.post_next_week_holiday()
     broker.post.assert_called_once_with(
-        "On the next week Monday, January 18 is day off - Martin Luther King Jr. Day.",
+        "On the next week Monday, January 18 is day off - Birthday of Martin Luther King, Jr.",
         color='info'
     )
 
@@ -33,7 +33,7 @@ def test_holiday_trigger(mock_date):
     bot = HolidayBot(broker)
     bot.on_message(1, {"user": "x", "text": "@stupid: What are next holidays?"})
     broker.post.assert_called_once_with(
-        "Monday, January 18 - Martin Luther King Jr. Day\n"
+        "Monday, January 18 - Birthday of Martin Luther King, Jr.\n"
         "Monday, February 15 - Washington's Birthday\n"
-        "Friday, April 15 - DC Emancipation Day"
+        "Monday, May 30 - Memorial Day"
     )

@@ -56,7 +56,7 @@ class HolidayBot(ChatBot):
         day = datetime.date.today() + datetime.timedelta(days=7)
         title = self.holiday_title(day)
         if title is not None:
-            return self.broker.post("On the next week {0} is day off - {1}."
+            return self.broker.post("On the next week {0} is day off - {1}"
                                     .format(day.strftime("%A, %B %-d"), title),
                                     color='info')
 
