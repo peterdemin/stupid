@@ -61,14 +61,14 @@ class LunchBot(ChatBot):
     def dont_mention(self, users):
         now = datetime.datetime.now()
         to_keep = set()
-        for user in users:
-            if user in self.EXCLUDE:
-                if self.EXCLUDE[user][0] <= now < self.EXCLUDE[user][1]:
+        for username in users.values():
+            if username in self.EXCLUDE:
+                if self.EXCLUDE[username][0] <= now < self.EXCLUDE[username][1]:
                     continue
-            to_keep.add(user)
+            to_keep.add(username)
         return {k: v
                 for k, v in users.items()
-                if k in to_keep}
+                if v in to_keep}
 
     def users_on_channel(self):
         return {user_id: self.username(user_id)
