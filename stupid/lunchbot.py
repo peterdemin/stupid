@@ -20,7 +20,7 @@ class LunchBot(ChatBot):
     def __init__(self, *args, **kwargs):
         super(LunchBot, self).__init__(*args, **kwargs)
         self.weather = WeatherForecast()
-        self.schedule.every().day.at("11:55").do(self.eat_some)
+        self.schedule.every().day.at("11:45").do(self.eat_some)
         self.schedule.every().day.at("15:55").do(self.eat_some)
         self.announce_ts = None
         self.ask_for_reply_after = None
