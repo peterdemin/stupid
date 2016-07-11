@@ -15,6 +15,8 @@ class LunchBot(ChatBot):
     EXCLUDE = {
         "sobolevi": (datetime.datetime(2016, 5, 17), datetime.datetime(2016, 6, 1)),
         "mikhailzakharov": (datetime.datetime(2010, 1, 1), datetime.datetime(2020, 1, 1)),
+        "deminp": (datetime.datetime(2016, 7, 14), datetime.datetime(2016, 7, 25)),
+        "ivanchenko": (datetime.datetime(2016, 7, 11), datetime.datetime(2016, 7, 25)),
     }
 
     def __init__(self, *args, **kwargs):
