@@ -1,6 +1,7 @@
 import itertools
 import logging
 import time
+import traceback
 
 import schedule
 
@@ -36,9 +37,15 @@ def setup_and_run():
 def run_forever(broker, bots):
     for i in itertools.count(0):
         for bot in bots:
-            bot.run_pending()
+            try:
+                bot.run_pending()
+            except:
+                traceback.print_exc()
         if i % 3 == 0:
-            poll_broker(i, broker, bots)
+            try:
+                poll_broker(i, broker, bots)
+            except:
+                traceback.print_exc()
         if i % 600 == 0:
             logger.info('Iteration #%d', i)
             logger.info(render_jobs())
