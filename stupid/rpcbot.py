@@ -23,7 +23,6 @@ class RPCBot(ChatBot):
             messages = copy.deepcopy(self._pending_messages)
             self._pending_messages.clear()
         for message in messages:
-            import pdb; pdb.set_trace()  # XXX BREAKPOINT
             channel_id = self.broker.channel_id(message['channel'])
             self.broker.post(
                 message['text'],
