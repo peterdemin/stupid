@@ -8,10 +8,11 @@ import schedule
 from stupid.chatbot import poll_broker
 from stupid.fate import FateGameBot
 from stupid.lunchbot import LunchBot
-from stupid.quotebot import QuoteBot
 from stupid.slackbroker import SlackBroker
 from stupid.exitbot import ExitBot
 from stupid.holidaybot import HolidayBot
+from stupid.rpcbot import RPCBot
+# from stupid.quotebot import QuoteBot
 
 
 logger = logging.getLogger(__name__)
@@ -25,11 +26,12 @@ def main():
 def setup_and_run():
     broker = SlackBroker()
     bots = [
-        QuoteBot(broker),
+        # QuoteBot(broker),
         LunchBot(broker),
         FateGameBot(broker),
         ExitBot(broker),
         HolidayBot(broker),
+        RPCBot(broker),
     ]
     run_forever(broker, bots)
 

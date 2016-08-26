@@ -18,21 +18,31 @@ class SlackBroker(object):
     def __init__(self):
         self.oldest_ts = None
 
-    def post(self, message, color=None):
-        logger.debug('Posting to %r message %r', self.CHANNEL_ID, message)
+    def post(self, message, color=None, channel_id=None):
+        channel_id = channel_id or self.CHANNEL_ID
+        logger.debug('Posting to %r message %r', channel_id, message)
         if not color:
-            return slack.chat.post_message(self.CHANNEL_ID, message, username='Stupid', link_names=True)
+            return slack.chat.post_message(channel_id, message, username='Stupid', link_names=True)
         else:
-            return slack.chat.post_message(self.CHANNEL_ID, "", username='Stupid', link_names=True,
+            return slack.chat.post_message(channel_id, "", username='Stupid', link_names=True,
                                            attachments=[{'text': message, 'fallback': message, 'color': color}])
 
     def channel_info(self, name):
-        for channel_info in slack.channels.list()['channels']:
-            if channel_info['name'] == name:
-                return channel_info
-        for channel_info in slack.groups.list()['groups']:
-            if channel_info['name'] == name:
-                return channel_info
+        if name.startswith('@'):
+            name = name[1:]
+            for user_info in slack.users.list()['members']:
+                if user_info['name'] == name:
+                    return user_info
+        else:
+            if name.startswith('#'):
+                name = name[1:]
+            for channel_info in slack.channels.list()['channels']:
+                if channel_info['name'] == name:
+                    return channel_info
+            for channel_info in slack.groups.list()['groups']:
+                if channel_info['name'] == name:
+                    return channel_info
+        logger.error('Channel/User name %s not found', name)
 
     def channel_id(self, name):
         return self.channel_info(name)['id']
