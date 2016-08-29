@@ -2,6 +2,10 @@
 stupid
 ===============================
 
+.. image:: https://badges.gitter.im/peterdemin-stupid/Lobby.svg
+   :alt: Join the chat at https://gitter.im/peterdemin-stupid/Lobby
+   :target: https://gitter.im/peterdemin-stupid/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
 .. image:: https://travis-ci.org/peterdemin/stupid.png?branch=master
     :target: https://travis-ci.org/peterdemin/stupid
 
