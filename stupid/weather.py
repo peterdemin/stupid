@@ -48,7 +48,7 @@ class WeatherForecast(object):
 
     def forecast(self, latitude, longitude):
         url = 'https://{url}/{token}/{latitude:.4f},{longitude:.4f}'.format(
-            url='api.forecast.io/forecast',
+            url='api.darksky.net/forecast',
             token=self.token,
             latitude=latitude,
             longitude=longitude,
