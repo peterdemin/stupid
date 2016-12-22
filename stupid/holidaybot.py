@@ -74,8 +74,14 @@ class HolidayBot(ChatBot):
 
     def previous_holiday(self, from_date):
         index = bisect.bisect_left(self.holiday_dates, from_date)
-        return self.holiday_dates[index], self.holiday_titles[index]
+        try:
+            return self.holiday_dates[index], self.holiday_titles[index]
+        except IndexError:
+            pass
 
     def next_holiday(self, from_date):
         index = bisect.bisect_right(self.holiday_dates, from_date)
-        return self.holiday_dates[index], self.holiday_titles[index]
+        try:
+            return self.holiday_dates[index], self.holiday_titles[index]
+        except IndexError:
+            pass
