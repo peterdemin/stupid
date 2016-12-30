@@ -18,6 +18,16 @@ HOLIDAYS = OrderedDict([
     (datetime.date(2016, 11, 11), "Veterans Day"),
     (datetime.date(2016, 11, 24), "Thanksgiving Day"),
     (datetime.date(2016, 12, 26), "Christmas Day"),
+    (datetime.date(2017, 1, 2), "New Year's Day"),
+    (datetime.date(2017, 1, 16), "Birthday of Martin Luther King, Jr."),
+    (datetime.date(2017, 2, 20), "Washington's Birthday"),
+    (datetime.date(2017, 5, 29), "Memorial Day"),
+    (datetime.date(2017, 7, 4), "Independence Day"),
+    (datetime.date(2017, 9, 4), "Labor Day"),
+    (datetime.date(2017, 10, 9), "Columbus Day"),
+    (datetime.date(2017, 11, 10), "Veterans Day"),
+    (datetime.date(2017, 11, 23), "Thanksgiving Day"),
+    (datetime.date(2017, 12, 25), "Christmas Day"),
 ])
 
 
