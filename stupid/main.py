@@ -41,11 +41,15 @@ def run_forever(broker, bots):
         for bot in bots:
             try:
                 bot.run_pending()
+            except SystemExit:
+                raise
             except:
                 traceback.print_exc()
         if i % 3 == 0:
             try:
                 poll_broker(i, broker, bots)
+            except SystemExit:
+                raise
             except:
                 traceback.print_exc()
         if i % 600 == 0:
