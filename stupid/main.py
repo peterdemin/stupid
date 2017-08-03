@@ -1,9 +1,9 @@
+import code
 import itertools
 import logging
+import signal
 import time
 import traceback
-
-import schedule
 
 from stupid.chatbot import poll_broker
 from stupid.fate import FateGameBot
@@ -11,7 +11,7 @@ from stupid.lunchbot import LunchBot
 from stupid.slackbroker import SlackBroker
 from stupid.exitbot import ExitBot
 from stupid.holidaybot import HolidayBot
-from stupid.rpcbot import RPCBot
+# from stupid.rpcbot import RPCBot
 # from stupid.quotebot import QuoteBot
 
 
@@ -24,14 +24,15 @@ def main():
 
 
 def setup_and_run():
+    bind_debug_signal()
     broker = SlackBroker()
     bots = [
         # QuoteBot(broker),
+        # RPCBot(broker),
         LunchBot(broker),
         FateGameBot(broker),
         ExitBot(broker),
         HolidayBot(broker),
-        RPCBot(broker),
     ]
     run_forever(broker, bots)
 
@@ -52,17 +53,29 @@ def run_forever(broker, bots):
                 raise
             except:
                 traceback.print_exc()
-        if i % 600 == 0:
+        if i % 1000 == 0:
             logger.info('Iteration #%d', i)
-            logger.info(render_jobs())
         time.sleep(1)
 
 
-def render_jobs():
-    return '\n'.join([
-        str(job.next_run)
-        for job in schedule.default_scheduler.jobs
-    ])
+def debug(sig, frame):
+    """
+    Interrupt running process, and provide a python prompt for
+    interactive debugging.
+    """
+    traceback.print_stack(frame)
+    scope = {'_frame': frame}       # Allow access to frame object.
+    scope.update(frame.f_globals)   # Unless shadowed by global
+    scope.update(frame.f_locals)
+    console = code.InteractiveConsole(scope)
+    message  = "Signal received: entering python shell.\nTraceback:\n"
+    message += "".join(traceback.format_stack(frame))
+    console.interact(message)
+    logger.info("Finished debug session")
+
+
+def bind_debug_signal():
+    signal.signal(signal.SIGUSR1, debug)
 
 
 if __name__ == '__main__':
