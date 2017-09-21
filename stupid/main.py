@@ -68,7 +68,7 @@ def debug(sig, frame):
     scope.update(frame.f_globals)   # Unless shadowed by global
     scope.update(frame.f_locals)
     console = code.InteractiveConsole(scope)
-    message  = "Signal received: entering python shell.\nTraceback:\n"
+    message = "Signal received: entering python shell.\nTraceback:\n"
     message += "".join(traceback.format_stack(frame))
     console.interact(message)
     logger.info("Finished debug session")
