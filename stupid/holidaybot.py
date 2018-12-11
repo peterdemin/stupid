@@ -6,28 +6,8 @@ import datetime
 from stupid.chatbot import ChatBot, trigger
 
 
-# http://dchr.dc.gov/page/holiday-schedules
+# https://www.ca3.uscourts.gov/2019-federal-holidays
 HOLIDAYS = OrderedDict([
-    (datetime.date(2016, 1, 1), "New Year's Day"),
-    (datetime.date(2016, 1, 18), "Birthday of Martin Luther King, Jr."),
-    (datetime.date(2016, 2, 15), "Washington's Birthday"),
-    (datetime.date(2016, 5, 30), "Memorial Day"),
-    (datetime.date(2016, 7, 4), "Independence Day"),
-    (datetime.date(2016, 9, 5), "Labor Day"),
-    (datetime.date(2016, 10, 10), "Columbus Day"),
-    (datetime.date(2016, 11, 11), "Veterans Day"),
-    (datetime.date(2016, 11, 24), "Thanksgiving Day"),
-    (datetime.date(2016, 12, 26), "Christmas Day"),
-    (datetime.date(2017, 1, 2), "New Year's Day"),
-    (datetime.date(2017, 1, 16), "Birthday of Martin Luther King, Jr."),
-    (datetime.date(2017, 2, 20), "Washington's Birthday"),
-    (datetime.date(2017, 5, 29), "Memorial Day"),
-    (datetime.date(2017, 7, 4), "Independence Day"),
-    (datetime.date(2017, 9, 4), "Labor Day"),
-    (datetime.date(2017, 10, 9), "Columbus Day"),
-    (datetime.date(2017, 11, 10), "Veterans Day"),
-    (datetime.date(2017, 11, 23), "Thanksgiving Day"),
-    (datetime.date(2017, 12, 25), "Christmas Day"),
     (datetime.date(2018, 1, 1), "New Year's Day"),
     (datetime.date(2018, 1, 15), "Birthday of Martin Luther King, Jr."),
     (datetime.date(2018, 2, 19), "Washington's Birthday"),
@@ -38,6 +18,17 @@ HOLIDAYS = OrderedDict([
     (datetime.date(2018, 11, 12), "Veterans Day"),
     (datetime.date(2018, 11, 22), "Thanksgiving Day"),
     (datetime.date(2018, 12, 25), "Christmas Day"),
+
+    (datetime.date(2019, 1, 1), "New Year's Day"),
+    (datetime.date(2019, 1, 21), "Birthday of Martin Luther King, Jr."),
+    (datetime.date(2019, 2, 18), "Washington’s Birthday"),
+    (datetime.date(2019, 5, 27), "Memorial Day"),
+    (datetime.date(2019, 7, 4), "Independence Day"),
+    (datetime.date(2019, 9, 2), "Labor Day"),
+    (datetime.date(2019, 10, 14), "Columbus Day"),
+    (datetime.date(2019, 11, 11), "Veterans Day"),
+    (datetime.date(2019, 11, 28), "Thanksgiving Day"),
+    (datetime.date(2019, 12, 25), "Christmas Day"),
 ])
 
 

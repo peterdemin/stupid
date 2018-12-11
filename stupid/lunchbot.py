@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 class LunchBot(ChatBot):
     ASK_TIMEOUT = 15
     EXCLUDE = {
-        "sobolevi": (datetime.datetime(2018, 8, 23), datetime.datetime(2018, 8, 29)),
-        "mikhailzakharov": (datetime.datetime(2010, 1, 1), datetime.datetime(2020, 1, 1)),
+        "sobolevi": (datetime.datetime(2018, 12, 24), datetime.datetime(2019, 1, 7)),
+        "ramusus": (datetime.datetime(2018, 12, 24), datetime.datetime(2019, 1, 7)),
         "deminp": (datetime.datetime(2017, 9, 15), datetime.datetime(2017, 10, 17)),
         "ivanchen": (datetime.datetime(2018, 7, 9), datetime.datetime(2018, 7, 24)),
     }
