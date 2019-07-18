@@ -16,7 +16,7 @@ class LunchBot(ChatBot):
         "sobolevi": (datetime.datetime(2018, 12, 24), datetime.datetime(2019, 1, 7)),
         "ramusus": (datetime.datetime(2018, 12, 24), datetime.datetime(2019, 1, 7)),
         "deminp": (datetime.datetime(2017, 9, 15), datetime.datetime(2017, 10, 17)),
-        "ivanchen": (datetime.datetime(2018, 7, 9), datetime.datetime(2018, 7, 24)),
+        "ivanchen": (datetime.datetime(2019, 7, 15), datetime.datetime(2018, 7, 29)),
     }
 
     def __init__(self, *args, **kwargs):
